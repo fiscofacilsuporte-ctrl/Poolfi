@@ -581,6 +581,69 @@
     font-size: 11px; color: var(--text3); line-height: 1.6;
   }
   .footer-legal a { color: var(--text3); text-decoration: underline; }
+
+  /* ── Historical Calculator ── */
+  .hist-toggle-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .hist-toggle-label { font-size: 12px; color: var(--text2); flex: 1; }
+  .hist-toggle {
+    width: 36px; height: 20px; border-radius: 10px;
+    background: var(--border2); border: none; cursor: pointer;
+    position: relative; transition: background 0.2s; flex-shrink: 0;
+  }
+  .hist-toggle.on { background: #4d9fff; }
+  .hist-toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 14px; height: 14px; border-radius: 50%; background: white;
+    transition: left 0.2s;
+  }
+  .hist-toggle.on::after { left: 19px; }
+  .hist-panel {
+    margin-top: 12px; padding: 14px;
+    background: var(--bg3); border-radius: var(--radius-sm);
+    border: 1px solid var(--border); display: none;
+  }
+  .hist-panel.visible { display: block; }
+  .hist-panel-title { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .hist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .hist-field label { font-size: 11px; color: var(--text3); display: block; margin-bottom: 4px; }
+  .hist-field input, .hist-field select {
+    width: 100%; padding: 7px 10px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: var(--mono); font-size: 13px; outline: none;
+    -webkit-appearance: none;
+  }
+  .hist-field input:focus, .hist-field select:focus { border-color: #4d9fff; }
+  .hist-fetch-btn {
+    width: 100%; padding: 9px; margin-bottom: 12px;
+    background: rgba(77,159,255,0.1); border: 1px solid rgba(77,159,255,0.3);
+    border-radius: var(--radius-sm); color: #4d9fff;
+    font-family: var(--font); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .hist-fetch-btn:hover { background: rgba(77,159,255,0.2); }
+  .hist-fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .hist-results { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hist-result-item {
+    background: var(--bg2); border-radius: var(--radius-sm);
+    padding: 10px; text-align: center; border: 1px solid var(--border);
+  }
+  .hist-result-label { font-size: 10px; color: var(--text3); text-transform: uppercase; margin-bottom: 4px; }
+  .hist-result-value { font-size: 15px; font-weight: 600; font-family: var(--mono); }
+  .hist-verdict {
+    margin-top: 10px; padding: 10px 12px; border-radius: var(--radius-sm);
+    font-size: 12px; line-height: 1.5; text-align: center;
+  }
+  .hist-verdict.positive { background: rgba(0,229,160,0.08); color: #00e5a0; border: 1px solid rgba(0,229,160,0.2); }
+  .hist-verdict.negative { background: rgba(255,77,106,0.08); color: #ff4d6a; border: 1px solid rgba(255,77,106,0.2); }
+  .hist-verdict.neutral  { background: rgba(77,159,255,0.08); color: #4d9fff; border: 1px solid rgba(77,159,255,0.2); }
+  .hist-loading { text-align:center; font-size:12px; color:var(--text3); padding:8px 0; }
+  .coingecko-credit { font-size:10px; color:var(--text3); text-align:right; margin-top:8px; }
+  .coingecko-credit a { color:var(--text3); }
 </style>
 </head>
 <body>
@@ -760,12 +823,12 @@
 
   <!-- Footer Contact -->
   <div class="page-footer">
-    <a href="mailto:contact@protonmail.com" class="contact-btn" id="contact-btn">
+    <a href="mailto:Poolfi.support@proton.me" class="contact-btn" id="contact-btn">
       <div class="contact-icon">✉️</div>
-      <span id="contact-label">Contacto · contact@proton.me</span>
+      <span id="contact-label">Poolfi.support@proton.me</span>
     </a>
     <p class="footer-legal" id="footer-legal">
-      © 2025 PoolFi · Apenas para fins educacionais · Não é aconselhamento financeiro<br>
+      © 2026 PoolFi · Apenas para fins educacionais · Não é aconselhamento financeiro<br>
       Dados via <a href="https://defillama.com" target="_blank">DeFiLlama</a> · 
       <a href="https://defillama.com" target="_blank">Metodologia</a>
     </p>
@@ -1477,6 +1540,97 @@ async function fetchPoolParty() {
   }
 }
 
+
+// ── Historical Calculator ─────────────────────────────────
+let histVisible = false;
+
+function toggleHist() {
+  histVisible = !histVisible;
+  const btn = document.getElementById('hist-toggle-btn');
+  const panel = document.getElementById('hist-panel');
+  btn.classList.toggle('on', histVisible);
+  panel.classList.toggle('visible', histVisible);
+}
+
+async function fetchHistorical() {
+  const token = (document.getElementById('hist-token').value || 'solana').trim().toLowerCase();
+  const days = parseInt(document.getElementById('hist-days').value) || 30;
+  const amount = parseFloat(document.getElementById('calc-amount').value) || 1000;
+  const apy = parseFloat(document.getElementById('calc-pool').value) || 0;
+
+  const fetchBtn = document.getElementById('hist-fetch-btn');
+  const loading = document.getElementById('hist-loading');
+  const results = document.getElementById('hist-results');
+  const verdict = document.getElementById('hist-verdict');
+  const credit = document.getElementById('hist-results-credit');
+
+  fetchBtn.disabled = true;
+  loading.style.display = 'block';
+  results.style.display = 'none';
+  verdict.style.display = 'none';
+  credit.style.display = 'none';
+
+  try {
+    // CoinGecko free API — price X days ago and current price
+    const url = 'https://api.coingecko.com/api/v3/coins/' + token + '/market_chart?vs_currency=usd&days=' + days + '&interval=daily';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Token not found. Try: solana, ethereum, bitcoin, usd-coin');
+    const data = await res.json();
+
+    const prices = data.prices; // [[timestamp, price], ...]
+    if (!prices || prices.length < 2) throw new Error('Not enough price data');
+
+    const priceThen = prices[0][1];
+    const priceNow = prices[prices.length - 1][1];
+    const priceChangePct = ((priceNow - priceThen) / priceThen) * 100;
+
+    // HODLing: if you held the token
+    const hodlGain = amount * (priceChangePct / 100);
+
+    // Pool earnings: APY over the period
+    const poolEarnings = amount * (apy / 100) * (days / 365);
+
+    // IL estimate for the pool
+    const r = priceNow / priceThen;
+    const ilPct = (2 * Math.sqrt(r) / (1 + r)) - 1;
+    const ilLoss = amount * Math.abs(ilPct);
+    const poolNet = poolEarnings - ilLoss;
+    const advantage = poolNet - hodlGain;
+
+    // Display
+    document.getElementById('hist-pool-earn').textContent = (poolNet >= 0 ? '+' : '') + '$' + poolNet.toFixed(2);
+    document.getElementById('hist-pool-earn').style.color = poolNet >= 0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('hist-hodl-gain').textContent = (hodlGain >= 0 ? '+' : '') + '$' + hodlGain.toFixed(2);
+    document.getElementById('hist-hodl-gain').style.color = hodlGain >= 0 ? '#4d9fff' : 'var(--red)';
+    document.getElementById('hist-price-then').textContent = '$' + priceThen.toFixed(2);
+    document.getElementById('hist-price-now').textContent = '$' + priceNow.toFixed(2);
+
+    results.style.display = 'grid';
+    credit.style.display = 'block';
+    verdict.style.display = 'block';
+
+    const tokenName = token.charAt(0).toUpperCase() + token.slice(1);
+    if (advantage > 0) {
+      verdict.className = 'hist-verdict positive';
+      verdict.innerHTML = '✅ <strong>Pool won!</strong> Over ' + days + ' days, providing liquidity returned $' + poolNet.toFixed(2) + ' vs HODLing ' + tokenName + ' which gave $' + hodlGain.toFixed(2) + '. Pool beat HODL by $' + advantage.toFixed(2) + '.';
+    } else if (advantage < -5) {
+      verdict.className = 'hist-verdict negative';
+      verdict.innerHTML = '❌ <strong>HODLing won.</strong> ' + tokenName + ' price ' + (priceChangePct >= 0 ? 'rose' : 'fell') + ' ' + Math.abs(priceChangePct).toFixed(1) + '% in ' + days + ' days. HODLing gave $' + hodlGain.toFixed(2) + ' vs pool net $' + poolNet.toFixed(2) + ' (after IL of $' + ilLoss.toFixed(2) + ').';
+    } else {
+      verdict.className = 'hist-verdict neutral';
+      verdict.innerHTML = '⚖️ <strong>Roughly equal.</strong> Pool and HODLing performed similarly over ' + days + ' days. Difference: $' + Math.abs(advantage).toFixed(2) + '.';
+    }
+
+  } catch (err) {
+    verdict.style.display = 'block';
+    verdict.className = 'hist-verdict negative';
+    verdict.textContent = '⚠️ ' + (err.message || 'Error fetching data. Check token name and try again.');
+  } finally {
+    fetchBtn.disabled = false;
+    loading.style.display = 'none';
+  }
+}
+
 // PWA install
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', e => {
@@ -1532,13 +1686,20 @@ const TRANSLATIONS = {
     hold_growth: 'Expected asset growth (%)', hold_period: 'Period',
     hold_note: '⚠️ Hold assumes linear price appreciation. Pool includes fee APY but does NOT discount Impermanent Loss — IL may reduce your actual pool return.',
     contact_label: 'Contact · contact@proton.me',
-    footer_legal: '© 2025 PoolFi · Educational purposes only · Not financial advice',
+    footer_legal: '© 2026 PoolFi · Educational purposes only · Not financial advice',
     support_title: '☕ Support PoolFi',
     support_desc: 'If you find PoolFi useful, consider making a contribution. It helps keep the project free and running.',
     copy: 'Copy address', copied: '✓ Copied!',
     install_title: 'Install PoolFi', install_sub: 'Add to home screen as app', install_btn: 'Install',
     audited: '🛡 audited',
     error: 'Error loading data. Retrying in 30s...',
+    hist_toggle: '📅 Historical: Pool vs HODLing (real past data)',
+    hist_title: 'Historical Performance — Pool vs HODLing',
+    hist_token: 'Token (e.g. solana, ethereum)',
+    hist_days: 'Days ago (entry point)',
+    hist_fetch: '🔍 Fetch real price data from CoinGecko',
+    hist_pool: 'Pool earnings', hist_hodl_gain: 'HODLing gain',
+    hist_price_then: 'Price then', hist_price_now: 'Price now',
     hero_title: 'Find the best<br><span class=\'hero-accent\'>liquidity pools</span>',
     hero_sub: 'Real-time APY data from the most trusted DeFi protocols. Audited projects only.',
     kraken_desc: 'To buy USDC/USDT use Kraken',
@@ -1564,14 +1725,21 @@ const TRANSLATIONS = {
     hold_amount: 'Montante (USD)', hold_pool: 'Pool (APY)',
     hold_growth: 'Valorização esperada do ativo (%)', hold_period: 'Período',
     hold_note: '⚠️ O cálculo de Hold assume valorização linear do ativo. O Pool inclui o APY de fees mas não desconta o Impermanent Loss — o IL pode reduzir o ganho real da pool.',
-    contact_label: 'Contacto · contact@proton.me',
-    footer_legal: '© 2025 PoolFi · Apenas para fins educacionais · Não é aconselhamento financeiro',
+    contact_label: 'Poolfi.support@proton.me',
+    footer_legal: '© 2026 PoolFi · Apenas para fins educacionais · Não é aconselhamento financeiro',
     support_title: '☕ Support PoolFi',
     support_desc: 'Se o PoolFi te é útil, considera fazer uma contribuição. Ajuda a manter o projeto gratuito e a funcionar.',
     copy: 'Copiar endereço', copied: '✓ Copiado!',
     install_title: 'Instalar PoolFi', install_sub: 'Adicionar ao ecrã inicial como app', install_btn: 'Instalar',
     audited: '🛡 auditado',
     error: 'Erro ao carregar dados. A tentar novamente em 30s...',
+    hist_toggle: '📅 Histórico: Pool vs HODLing (dados reais do passado)',
+    hist_title: 'Performance Histórica — Pool vs HODLing',
+    hist_token: 'Token (ex: solana, ethereum)',
+    hist_days: 'Dias atrás (ponto de entrada)',
+    hist_fetch: '🔍 Buscar dados reais do CoinGecko',
+    hist_pool: 'Ganho na pool', hist_hodl_gain: 'Ganho HODLing',
+    hist_price_then: 'Preço nessa altura', hist_price_now: 'Preço atual',
     hero_title: 'Encontra as melhores<br><span class=\'hero-accent\'>pools de liquidez</span>',
     hero_sub: 'Dados de APY em tempo real dos protocolos DeFi mais confiáveis. Apenas projetos auditados.',
     kraken_desc: 'Para comprares USDC/USDT usa a Kraken',
@@ -1597,14 +1765,21 @@ const TRANSLATIONS = {
     hold_amount: 'Monto (USD)', hold_pool: 'Pool (APY)',
     hold_growth: 'Valorización esperada del activo (%)', hold_period: 'Período',
     hold_note: '⚠️ El cálculo de Hold asume valorización lineal del activo. El Pool incluye el APY de fees pero NO descuenta el Impermanent Loss — el IL puede reducir el retorno real.',
-    contact_label: 'Contacto · contact@proton.me',
-    footer_legal: '© 2025 PoolFi · Solo con fines educativos · No es asesoramiento financiero',
+    contact_label: 'Poolfi.support@proton.me',
+    footer_legal: '© 2026 PoolFi · Solo con fines educativos · No es asesoramiento financiero',
     support_title: '☕ Support PoolFi',
     support_desc: 'Si PoolFi te resulta útil, considera hacer una contribución. Ayuda a mantener el proyecto gratuito y en funcionamiento.',
     copy: 'Copiar dirección', copied: '✓ Copiado!',
     install_title: 'Instalar PoolFi', install_sub: 'Añadir a pantalla de inicio', install_btn: 'Instalar',
     audited: '🛡 auditado',
     error: 'Error al cargar datos. Reintentando en 30s...',
+    hist_toggle: '📅 Histórico: Pool vs HODLing (datos reales del pasado)',
+    hist_title: 'Rendimiento Histórico — Pool vs HODLing',
+    hist_token: 'Token (ej: solana, ethereum)',
+    hist_days: 'Días atrás (punto de entrada)',
+    hist_fetch: '🔍 Obtener datos reales de CoinGecko',
+    hist_pool: 'Ganancia en pool', hist_hodl_gain: 'Ganancia HODLing',
+    hist_price_then: 'Precio entonces', hist_price_now: 'Precio actual',
     hero_title: 'Encuentra los mejores<br><span class=\'hero-accent\'>pools de liquidez</span>',
     hero_sub: 'Datos de APY en tiempo real de los protocolos DeFi más confiables. Solo proyectos auditados.',
     kraken_desc: 'Para comprar USDC/USDT usa Kraken',
