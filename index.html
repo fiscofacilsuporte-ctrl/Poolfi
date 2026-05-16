@@ -494,6 +494,33 @@
   }
   .kraken-desc { font-size: 11px; color: var(--text3); }
 
+  /* ── Affiliate buttons row ── */
+  .affiliate-row {
+    display: flex; gap: 10px; justify-content: center;
+    flex-wrap: wrap; margin-top: 10px;
+  }
+  /* Kraken button already defined above — keep as-is */
+
+  /* ── SafePal Button ── */
+  .safepal-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 9px 16px;
+    text-decoration: none; color: var(--text2);
+    font-size: 12px; font-family: var(--font);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .safepal-btn:hover {
+    border-color: rgba(30,160,255,0.45);
+    color: var(--text); background: var(--bg3);
+  }
+  .safepal-logo {
+    width: 20px; height: 20px; border-radius: 4px;
+    background: linear-gradient(135deg,#1B5FFF 0%,#00C2FF 100%);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .safepal-desc { font-size: 11px; color: var(--text3); }
+
   /* ── Calculator Tabs ── */
   .calc-tabs {
     display: flex; gap: 4px; margin-left: auto;
@@ -691,13 +718,33 @@
       <span class="source-tag"><span class="source-check">✅</span> GMX</span>
       <span class="source-tag"><span class="source-check">✅</span> Pool Party</span>
     </div>
-    <a href="https://proinvite.kraken.com/9f1e/stbjy7j2" target="_blank" rel="noopener" class="kraken-btn" id="kraken-btn">
-      <div class="kraken-logo">K</div>
-      <div>
-        <div id="kraken-desc">Para comprares USDC/USDT usa a Kraken</div>
-        <div class="kraken-desc">kraken.com · Aproveita o bónus de boas-vindas 🎁</div>
-      </div>
-    </a>
+    <div class="affiliate-row">
+
+      <!-- Kraken affiliate -->
+      <a href="https://proinvite.kraken.com/9f1e/stbjy7j2" target="_blank" rel="noopener sponsored" class="kraken-btn" id="kraken-btn">
+        <div class="kraken-logo">K</div>
+        <div>
+          <div id="kraken-desc">Compra USDC/USDT na Kraken</div>
+          <div class="kraken-desc">kraken.com · Bónus de boas-vindas 🎁</div>
+        </div>
+      </a>
+
+      <!-- SafePal affiliate — Hardware Wallet -->
+      <a href="https://fas.st/t/mHdptCz3" target="_blank" rel="noopener sponsored" class="safepal-btn" id="safepal-btn">
+        <div class="safepal-logo">
+          <!-- SafePal shield icon -->
+          <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.5 1L11.5 3.2V7C11.5 9.8 9.3 12.4 6.5 13C3.7 12.4 1.5 9.8 1.5 7V3.2L6.5 1Z" fill="white" fill-opacity="0.9"/>
+            <path d="M5 7L6.2 8.2L8.5 5.5" stroke="#1B5FFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div id="safepal-desc">Protege os teus crypto — SafePal Wallet</div>
+          <div class="safepal-desc">Hardware wallet · Cold storage 🔒</div>
+        </div>
+      </a>
+
+    </div>
   </div>
 
 
@@ -1705,6 +1752,7 @@ const TRANSLATIONS = {
     hero_title: 'Find the best<br><span class=\'hero-accent\'>liquidity pools</span>',
     hero_sub: 'Real-time APY data from the most trusted DeFi protocols. Audited projects only.',
     kraken_desc: 'To buy USDC/USDT use Kraken',
+    safepal_desc: 'Protect your crypto — SafePal Wallet',
   },
   pt: {
     search_placeholder: 'Pesquisar pool, token, protocolo...',
@@ -1745,6 +1793,7 @@ const TRANSLATIONS = {
     hero_title: 'Encontra as melhores<br><span class=\'hero-accent\'>pools de liquidez</span>',
     hero_sub: 'Dados de APY em tempo real dos protocolos DeFi mais confiáveis. Apenas projetos auditados.',
     kraken_desc: 'Para comprares USDC/USDT usa a Kraken',
+    safepal_desc: 'Protege os teus crypto — SafePal Wallet',
   },
   es: {
     search_placeholder: 'Buscar pool, token, protocolo...',
@@ -1785,6 +1834,7 @@ const TRANSLATIONS = {
     hero_title: 'Encuentra los mejores<br><span class=\'hero-accent\'>pools de liquidez</span>',
     hero_sub: 'Datos de APY en tiempo real de los protocolos DeFi más confiables. Solo proyectos auditados.',
     kraken_desc: 'Para comprar USDC/USDT usa Kraken',
+    safepal_desc: 'Protege tus crypto — SafePal Wallet',
   },
 };
 
@@ -1884,6 +1934,8 @@ function applyTranslations() {
   if (heroSub) heroSub.textContent = t('hero_sub');
   const krakenDesc = document.getElementById('kraken-desc');
   if (krakenDesc) krakenDesc.textContent = t('kraken_desc');
+  const safepalDesc = document.getElementById('safepal-desc');
+  if (safepalDesc) safepalDesc.textContent = t('safepal_desc');
   // lang buttons highlight
   document.querySelectorAll('.lang-btn').forEach(b => {
     b.style.borderColor = b.dataset.lang === currentLang ? 'rgba(0,229,160,0.5)' : 'rgba(255,255,255,0.07)';
