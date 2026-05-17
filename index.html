@@ -914,7 +914,7 @@
 
         <div id="btc-loading-state" style="text-align:center;padding:32px 0">
           <div class="btc-spinner"></div>
-          <div style="font-size:13px;color:var(--text3);margin-top:12px">A analisar indicadores on-chain...</div>
+          <div id="btc-loading-text" style="font-size:13px;color:var(--text3);margin-top:12px">A analisar indicadores on-chain...</div>
         </div>
 
         <div id="btc-result-state" style="display:none">
@@ -950,7 +950,7 @@
         <div id="btc-error-state" style="display:none;text-align:center;padding:24px">
           <div style="font-size:32px;margin-bottom:8px">⚠️</div>
           <div style="font-size:14px;color:var(--text3)" id="btc-error-msg">Erro ao analisar. Tenta novamente.</div>
-          <button onclick="runBtcAnalysis()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:1px solid var(--green);background:rgba(0,229,160,0.08);color:var(--green);cursor:pointer;font-family:var(--font);font-size:13px">↺ Tentar novamente</button>
+          <button id="btc-retry-btn" onclick="runBtcAnalysis()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:1px solid var(--green);background:rgba(0,229,160,0.08);color:var(--green);cursor:pointer;font-family:var(--font);font-size:13px">↺ Tentar novamente</button>
         </div>
       </div>
     </div>
@@ -1990,6 +1990,20 @@ const TRANSLATIONS = {
     hero_sub: 'Real-time APY data from the most trusted DeFi protocols. Audited projects only.',
     kraken_desc: 'To buy USDC/USDT use Kraken',
     safepal_desc: 'Protect your crypto — SafePal Wallet',
+    // BTC Widget & Modal
+    btc_widget_title: 'BTC Timing',
+    btc_widget_sub: 'On-chain · Market · Daily',
+    btc_widget_cta: 'See analysis →',
+    btc_widget_tap: '· Tap to view',
+    btc_modal_title: 'Bitcoin Timing',
+    btc_modal_sub: 'Multi-indicator analysis',
+    btc_loading: 'Analysing on-chain indicators...',
+    btc_score_bad: 'Bad', btc_score_neutral: 'Neutral', btc_score_good: 'Good',
+    btc_disclaimer: 'these analyses are generated automatically based on public indicators. they do not constitute investment advice. cryptocurrency markets involve high risks and the user is solely responsible for their investment decisions.',
+    btc_error_msg: 'Error analysing. Please try again.',
+    btc_retry: '↺ Try again',
+    btc_mining_label: 'Mining Cost vs Price',
+    btc_mining_source: 'MacroMicro',
   },
   pt: {
     search_placeholder: 'Pesquisar pool, token, protocolo...',
@@ -2031,6 +2045,20 @@ const TRANSLATIONS = {
     hero_sub: 'Dados de APY em tempo real dos protocolos DeFi mais confiáveis. Apenas projetos auditados.',
     kraken_desc: 'Para comprares USDC/USDT usa a Kraken',
     safepal_desc: 'Protege os teus crypto — SafePal Wallet',
+    // BTC Widget & Modal
+    btc_widget_title: 'Timing BTC',
+    btc_widget_sub: 'On-chain · Mercado · Diário',
+    btc_widget_cta: 'Ver análise →',
+    btc_widget_tap: '· Toca para ver',
+    btc_modal_title: 'Timing Bitcoin',
+    btc_modal_sub: 'Análise multi-indicador',
+    btc_loading: 'A analisar indicadores on-chain...',
+    btc_score_bad: 'Mau', btc_score_neutral: 'Neutro', btc_score_good: 'Bom',
+    btc_disclaimer: 'estas análises são geradas automaticamente com base em indicadores públicos. não constituem conselho de investimento. os mercados de criptomoedas envolvem riscos elevados e o utilizador é o único responsável pelas suas decisões de investimento.',
+    btc_error_msg: 'Erro ao analisar. Tenta novamente.',
+    btc_retry: '↺ Tentar novamente',
+    btc_mining_label: 'Custo de Mineração vs Preço',
+    btc_mining_source: 'MacroMicro',
   },
   es: {
     search_placeholder: 'Buscar pool, token, protocolo...',
@@ -2072,6 +2100,20 @@ const TRANSLATIONS = {
     hero_sub: 'Datos de APY en tiempo real de los protocolos DeFi más confiables. Solo proyectos auditados.',
     kraken_desc: 'Para comprar USDC/USDT usa Kraken',
     safepal_desc: 'Protege tus crypto — SafePal Wallet',
+    // BTC Widget & Modal
+    btc_widget_title: 'Timing BTC',
+    btc_widget_sub: 'On-chain · Mercado · Diario',
+    btc_widget_cta: 'Ver análisis →',
+    btc_widget_tap: '· Toca para ver',
+    btc_modal_title: 'Timing Bitcoin',
+    btc_modal_sub: 'Análisis multi-indicador',
+    btc_loading: 'Analizando indicadores on-chain...',
+    btc_score_bad: 'Malo', btc_score_neutral: 'Neutro', btc_score_good: 'Bueno',
+    btc_disclaimer: 'estos análisis se generan automáticamente basándose en indicadores públicos. no constituyen asesoramiento de inversión. los mercados de criptomonedas conllevan altos riesgos y el usuario es el único responsable de sus decisiones de inversión.',
+    btc_error_msg: 'Error al analizar. Inténtalo de nuevo.',
+    btc_retry: '↺ Intentar de nuevo',
+    btc_mining_label: 'Costo Minería vs Precio',
+    btc_mining_source: 'MacroMicro',
   },
 };
 
@@ -2173,6 +2215,34 @@ function applyTranslations() {
   if (krakenDesc) krakenDesc.textContent = t('kraken_desc');
   const safepalDesc = document.getElementById('safepal-desc');
   if (safepalDesc) safepalDesc.textContent = t('safepal_desc');
+  // BTC widget
+  const btcWidgetTitle = document.querySelector('.btc-widget-title');
+  if (btcWidgetTitle) {
+    // preserve the badge span
+    const badge = btcWidgetTitle.querySelector('.btc-widget-badge');
+    btcWidgetTitle.childNodes[0].textContent = t('btc_widget_title') + ' ';
+    if (badge) btcWidgetTitle.appendChild(badge);
+  }
+  const btcWidgetSub = document.getElementById('btc-widget-sub');
+  if (btcWidgetSub && !btcWidgetSub.dataset.hasPrice) btcWidgetSub.textContent = t('btc_widget_sub');
+  const btcWidgetCta = document.querySelector('.btc-widget-cta');
+  if (btcWidgetCta) btcWidgetCta.textContent = t('btc_widget_cta');
+  // BTC modal static text
+  const btcScoreMarkers = document.querySelector('.btc-score-markers');
+  if (btcScoreMarkers) {
+    const spans = btcScoreMarkers.querySelectorAll('span');
+    if (spans[0]) spans[0].textContent = t('btc_score_bad');
+    if (spans[1]) spans[1].textContent = t('btc_score_neutral');
+    if (spans[2]) spans[2].textContent = t('btc_score_good');
+  }
+  const btcDisclaimer = document.querySelector('.btc-disclaimer');
+  if (btcDisclaimer) btcDisclaimer.textContent = t('btc_disclaimer');
+  const btcLoadingText = document.getElementById('btc-loading-text');
+  if (btcLoadingText) btcLoadingText.textContent = t('btc_loading');
+  const btcErrorMsg = document.getElementById('btc-error-msg');
+  if (btcErrorMsg) btcErrorMsg.textContent = t('btc_error_msg');
+  const btcRetryBtn = document.getElementById('btc-retry-btn');
+  if (btcRetryBtn) btcRetryBtn.textContent = t('btc_retry');
   // lang buttons highlight
   document.querySelectorAll('.lang-btn').forEach(b => {
     b.style.borderColor = b.dataset.lang === currentLang ? 'rgba(0,229,160,0.5)' : 'rgba(255,255,255,0.07)';
@@ -2228,6 +2298,7 @@ function openBtcTiming() {
   if (cached) {
     updateBtcWidget(cached);
     showBtcResult(cached);
+    applyTranslations();
   } else {
     runBtcAnalysis();
   }
@@ -2280,7 +2351,9 @@ function showBtcError(msg) {
   document.getElementById('btc-loading-state').style.display = 'none';
   document.getElementById('btc-result-state').style.display = 'none';
   document.getElementById('btc-error-state').style.display = 'block';
-  document.getElementById('btc-error-msg').textContent = msg || 'Erro ao analisar. Tenta novamente.';
+  document.getElementById('btc-error-msg').textContent = msg || t('btc_error_msg');
+  const retryBtn = document.getElementById('btc-retry-btn');
+  if (retryBtn) retryBtn.textContent = t('btc_retry');
 }
 
 function showBtcResult(data) {
@@ -2291,12 +2364,10 @@ function showBtcResult(data) {
   const now = new Date();
   document.getElementById('btc-modal-date').textContent = now.toLocaleDateString('pt-PT', {day:'numeric',month:'short',year:'numeric'});
   const btcLangTitle = typeof currentLang !== 'undefined' ? currentLang : 'pt';
-  const BTC_TITLE = { pt: 'Timing Bitcoin', en: 'Bitcoin Timing', es: 'Timing Bitcoin' };
-  const BTC_SUB = { pt: 'Análise multi-indicador', en: 'Multi-indicator analysis', es: 'Análisis multi-indicador' };
   const titleEl = document.getElementById('btc-modal-title-text');
   const subEl = document.getElementById('btc-modal-subtitle-text');
-  if (titleEl) titleEl.childNodes[0].textContent = BTC_TITLE[btcLangTitle] || 'Bitcoin Timing';
-  if (subEl) subEl.childNodes[0].textContent = (BTC_SUB[btcLangTitle] || 'Multi-indicator analysis') + ' · ';
+  if (titleEl) titleEl.childNodes[0].textContent = t('btc_modal_title');
+  if (subEl) subEl.childNodes[0].textContent = t('btc_modal_sub') + ' · ';
 
   // Verdict
   const verdictBox = document.getElementById('btc-verdict-box');
@@ -2347,7 +2418,8 @@ function showBtcResult(data) {
     const lang = typeof currentLang !== 'undefined' ? currentLang : 'pt';
     const indName = lang === 'en' ? (ind.nameEN || ind.name) : lang === 'es' ? (ind.nameES || ind.name) : ind.name;
     const indStatus = lang === 'en' ? (ind.statusEN || ind.status) : lang === 'es' ? (ind.statusES || ind.status) : ind.status;
-    const sourceTag = ind.source ? `<span style="font-size:9px;color:var(--text3);margin-left:4px">· ${ind.source}</span>` : '';
+    const indSource = lang === 'en' ? (ind.sourceEN || ind.source) : lang === 'es' ? (ind.sourceES || ind.source) : ind.source;
+    const sourceTag = indSource ? `<span style="font-size:9px;color:var(--text3);margin-left:4px">· ${indSource}</span>` : '';
     return `
       <div class="btc-indicator">
         <div class="btc-ind-dot" style="background:${dotColor}"></div>
@@ -2473,42 +2545,43 @@ async function runBtcAnalysis() {
     totalScore += mvrvPoints;
 
     // ── 4. Custo de Mineração vs Preço ──
-    // Fonte: MacroMicro (en.macromicro.me/charts/29435) — dados de 8 Mai 2026
-    // Custo total de produção BTC: ~$82,702 (inclui energia + hardware + overhead)
-    // BTC actual: ~$80,000 → mineiros em ligeira perda → zona de suporte histórico
+    // Fonte: MacroMicro (en.macromicro.me/charts/29435) — último valor: 2026-05-08
+    // Custo total de produção BTC: $82,702.96 (energia + hardware + overhead, via Cambridge CBECI)
+    // Preço BTC em tempo real: via CoinGecko acima
     // Lógica: quando BTC < custo mineração = sinal de compra forte (miners capitulam)
-    //         quando BTC 0-20% acima custo = neutro/favorável
-    //         quando BTC > 20% acima custo = sobrecompra / má altura
-    const MINING_COST_2026 = 82700; // MacroMicro total production cost Mai 2026
+    //         quando BTC 0-15% acima custo = neutro/favorável
+    //         quando BTC > 15% acima custo = sobreextendido
+    const MINING_COST = 82702.96; // MacroMicro · 2026-05-08 · USD
+    const MINING_DATE = '08 Mai 2026';
+    const MINING_DATE_EN = 'May 8, 2026';
+    const MINING_DATE_ES = '8 May 2026';
     let miningPoints = 0;
     let miningStatus = '';
     let miningStatusEN = '';
     let miningStatusES = '';
     if (btcPrice !== null) {
-      const miningMargin = ((btcPrice - MINING_COST_2026) / MINING_COST_2026) * 100;
+      const miningMargin = ((btcPrice - MINING_COST) / MINING_COST) * 100;
+      const priceK = `$${Math.round(MINING_COST/1000)}k`;
       if (miningMargin < -5) {
-        // BTC below mining cost → very bullish signal (miner capitulation = historical bottom)
         miningPoints = 1;
-        miningStatus = `BTC abaixo custo mineração ($${Math.round(MINING_COST_2026/1000)}k) · Sinal de acumulação`;
-        miningStatusEN = `BTC below mining cost ($${Math.round(MINING_COST_2026/1000)}k) · Strong buy signal`;
-        miningStatusES = `BTC bajo costo de minería ($${Math.round(MINING_COST_2026/1000)}k) · Señal de acumulación`;
+        miningStatus = `BTC abaixo custo mineração (${priceK}) · Sinal de acumulação forte`;
+        miningStatusEN = `BTC below mining cost (${priceK}) · Strong accumulation signal`;
+        miningStatusES = `BTC bajo costo de minería (${priceK}) · Señal de acumulación fuerte`;
       } else if (miningMargin >= -5 && miningMargin < 15) {
-        // Near breakeven → neutral/slightly bullish
         miningPoints = 1;
-        miningStatus = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs custo mineração ($${Math.round(MINING_COST_2026/1000)}k) · Zona favorável`;
-        miningStatusEN = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs mining cost ($${Math.round(MINING_COST_2026/1000)}k) · Favourable zone`;
-        miningStatusES = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs costo minería ($${Math.round(MINING_COST_2026/1000)}k) · Zona favorable`;
+        miningStatus = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs custo (${priceK}) · Zona favorável`;
+        miningStatusEN = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs cost (${priceK}) · Favourable zone`;
+        miningStatusES = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs costo (${priceK}) · Zona favorable`;
       } else {
-        // More than 15% above → extended, bearish signal
         miningPoints = -1;
-        miningStatus = `BTC +${miningMargin.toFixed(0)}% acima custo mineração ($${Math.round(MINING_COST_2026/1000)}k) · Sobreextendido`;
-        miningStatusEN = `BTC +${miningMargin.toFixed(0)}% above mining cost ($${Math.round(MINING_COST_2026/1000)}k) · Over-extended`;
-        miningStatusES = `BTC +${miningMargin.toFixed(0)}% sobre costo minería ($${Math.round(MINING_COST_2026/1000)}k) · Sobreextendido`;
+        miningStatus = `BTC +${miningMargin.toFixed(0)}% acima custo (${priceK}) · Sobreextendido`;
+        miningStatusEN = `BTC +${miningMargin.toFixed(0)}% above cost (${priceK}) · Over-extended`;
+        miningStatusES = `BTC +${miningMargin.toFixed(0)}% sobre costo (${priceK}) · Sobreextendido`;
       }
     } else {
-      miningStatus = 'Sem dados';
-      miningStatusEN = 'No data';
-      miningStatusES = 'Sin datos';
+      miningStatus = 'Sem dados de preço (CoinGecko)';
+      miningStatusEN = 'No price data (CoinGecko)';
+      miningStatusES = 'Sin datos de precio (CoinGecko)';
     }
     indicators.push({ 
       name: 'Custo de Mineração vs Preço', 
@@ -2518,7 +2591,9 @@ async function runBtcAnalysis() {
       statusEN: miningStatusEN,
       statusES: miningStatusES,
       points: miningPoints,
-      source: 'MacroMicro'
+      source: `MacroMicro · ${MINING_DATE}`,
+      sourceEN: `MacroMicro · ${MINING_DATE_EN}`,
+      sourceES: `MacroMicro · ${MINING_DATE_ES}`,
     });
     totalScore += miningPoints;
 
@@ -2595,17 +2670,36 @@ async function runBtcAnalysis() {
     const displayScore = Math.max(0, Math.min(6, totalScore + 1)); // shift para tornar positivo
     let verdict = 'neutral';
     let summary = '';
-    const priceStr = btcPrice ? `$${btcPrice.toLocaleString('pt-PT')}` : 'N/D';
+    const priceStr = btcPrice ? `$${Math.round(btcPrice).toLocaleString('en')}` : 'N/D';
+    const summaryLang = typeof currentLang !== 'undefined' ? currentLang : 'pt';
 
     if (totalScore >= 3) {
       verdict = 'good';
-      summary = `Os indicadores atuais (BTC a ${priceStr}) apontam para condições favoráveis de acumulação. O Fear & Greed e os dados on-chain sugerem que o mercado não está em zona de euforia.`;
+      if (summaryLang === 'en') {
+        summary = `Current indicators (BTC at ${priceStr}) point to favourable accumulation conditions. The Fear & Greed index and on-chain data suggest the market is not in euphoria territory.`;
+      } else if (summaryLang === 'es') {
+        summary = `Los indicadores actuales (BTC a ${priceStr}) apuntan a condiciones favorables de acumulación. El Fear & Greed y los datos on-chain sugieren que el mercado no está en zona de euforia.`;
+      } else {
+        summary = `Os indicadores atuais (BTC a ${priceStr}) apontam para condições favoráveis de acumulação. O Fear & Greed e os dados on-chain sugerem que o mercado não está em zona de euforia.`;
+      }
     } else if (totalScore >= 0) {
       verdict = 'neutral';
-      summary = `O mercado encontra-se em zona neutra com BTC a ${priceStr}. DCA (Dollar-Cost Averaging) é a estratégia mais prudente neste contexto misto.`;
+      if (summaryLang === 'en') {
+        summary = `The market is in a neutral zone with BTC at ${priceStr}. DCA (Dollar-Cost Averaging) is the most prudent strategy in this mixed context.`;
+      } else if (summaryLang === 'es') {
+        summary = `El mercado se encuentra en zona neutra con BTC a ${priceStr}. El DCA (Dollar-Cost Averaging) es la estrategia más prudente en este contexto mixto.`;
+      } else {
+        summary = `O mercado encontra-se em zona neutra com BTC a ${priceStr}. DCA (Dollar-Cost Averaging) é a estratégia mais prudente neste contexto misto.`;
+      }
     } else {
       verdict = 'bad';
-      summary = `Vários indicadores sinalizam sobrecompra ou risco elevado com BTC a ${priceStr}. Cautela recomendada — aguarda pullback ou continua DCA moderado.`;
+      if (summaryLang === 'en') {
+        summary = `Several indicators signal overbought conditions or elevated risk with BTC at ${priceStr}. Caution recommended — wait for a pullback or continue moderate DCA.`;
+      } else if (summaryLang === 'es') {
+        summary = `Varios indicadores señalan sobrecompra o riesgo elevado con BTC a ${priceStr}. Se recomienda cautela — espera un pullback o continúa DCA moderado.`;
+      } else {
+        summary = `Vários indicadores sinalizam sobrecompra ou risco elevado com BTC a ${priceStr}. Cautela recomendada — aguarda pullback ou continua DCA moderado.`;
+      }
     }
 
     const result = {
@@ -2621,10 +2715,12 @@ async function runBtcAnalysis() {
     // Update widget ring
     updateBtcWidget(result);
     showBtcResult(result);
+    // Re-apply translations so modal static text respects current language
+    applyTranslations();
 
   } catch(err) {
     console.error('BTC timing error:', err);
-    showBtcError('Sem conexão com as APIs de mercado. Verifica a tua ligação e tenta novamente.');
+    showBtcError(t('btc_error_msg') + ' (API)');
   }
 }
 
@@ -2644,7 +2740,11 @@ function updateBtcWidget(data) {
   label.textContent = data.score;
   label.style.color = color;
   if (data.btcPrice) {
-    sub.textContent = `$${Math.round(data.btcPrice).toLocaleString('en')} · Toca para ver`;
+    const subEl = document.getElementById('btc-widget-sub');
+    if (subEl) {
+      subEl.textContent = `$${Math.round(data.btcPrice).toLocaleString('en')} ${t('btc_widget_tap')}`;
+      subEl.dataset.hasPrice = '1';
+    }
   }
 }
 
