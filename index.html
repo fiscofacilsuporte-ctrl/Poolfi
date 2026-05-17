@@ -2311,7 +2311,6 @@ function initTheme() {
 
 // Cache key for daily analysis
 const BTC_CACHE_KEY = 'btc_timing_cache';
-const BTC_CACHE_VERSION = '2'; // bump this to invalidate old cache
 
 function getBtcCachedResult() {
   try {
@@ -2319,14 +2318,13 @@ function getBtcCachedResult() {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     const today = new Date().toDateString();
-    if (parsed.date === today && parsed.v === BTC_CACHE_VERSION) return parsed;
+    if (parsed.date === today) return parsed;
   } catch(e) {}
   return null;
 }
 
 function setBtcCache(data) {
   data.date = new Date().toDateString();
-  data.v = BTC_CACHE_VERSION;
   localStorage.setItem(BTC_CACHE_KEY, JSON.stringify(data));
 }
 
