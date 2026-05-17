@@ -678,23 +678,53 @@
   .btc-widget {
     display: flex; align-items: center; justify-content: space-between;
     background: var(--bg2);
-    border: 1px solid rgba(247,147,26,0.2);
+    border: none;
     border-radius: 14px; padding: 14px 16px;
     cursor: pointer; font-family: var(--font);
     transition: all 0.2s; text-align: left;
     margin: 14px auto 4px; max-width: 420px; width: 100%;
     position: relative; overflow: hidden;
+    z-index: 0;
   }
+  /* Animated rotating border */
+  .btc-widget::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 200deg,
+      #f7931a 240deg,
+      #ffb830 270deg,
+      #fff3e0 280deg,
+      #ffb830 290deg,
+      #f7931a 320deg,
+      transparent 360deg
+    );
+    animation: btc-border-spin 3s linear infinite;
+    z-index: -1;
+  }
+  /* Inner background to mask the pseudo-element */
   .btc-widget::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(247,147,26,0.5), transparent);
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    border-radius: 13px;
+    background: var(--bg2);
+    z-index: -1;
+  }
+  @keyframes btc-border-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
   }
   .btc-widget:hover {
-    border-color: rgba(247,147,26,0.45);
     background: var(--bg3);
     transform: translateY(-1px);
-    box-shadow: 0 8px 28px rgba(247,147,26,0.08);
+    box-shadow: 0 8px 28px rgba(247,147,26,0.15);
   }
+  .btc-widget:hover::before { background: var(--bg3); }
   .btc-widget:active { transform: translateY(0); }
   .btc-widget-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
   .btc-widget-coin {
@@ -2436,8 +2466,12 @@ function showBtcResult(data) {
     `;
   }).join('');
 
-  // Summary
-  document.getElementById('btc-summary').textContent = data.summary || '';
+  // Summary — pick correct language at display time
+  const summaryLang = typeof currentLang !== 'undefined' ? currentLang : 'pt';
+  const summary = summaryLang === 'en' ? (data.summaryEN || data.summary || '') :
+                  summaryLang === 'es' ? (data.summaryES || data.summary || '') :
+                  (data.summaryPT || data.summary || '');
+  document.getElementById('btc-summary').textContent = summary;
 }
 
 async function runBtcAnalysis() {
@@ -2570,19 +2604,19 @@ async function runBtcAnalysis() {
       const priceK = `$${Math.round(MINING_COST/1000)}k`;
       if (miningMargin < -5) {
         miningPoints = 1;
-        miningStatus = `BTC abaixo custo mineração (${priceK}) · Sinal de acumulação forte`;
-        miningStatusEN = `BTC below mining cost (${priceK}) · Strong accumulation signal`;
-        miningStatusES = `BTC bajo costo de minería (${priceK}) · Señal de acumulación fuerte`;
+        miningStatus = `BTC abaixo do custo de mineração · Sinal de acumulação forte`;
+        miningStatusEN = `BTC below mining cost · Strong accumulation signal`;
+        miningStatusES = `BTC por debajo del costo de minería · Señal de acumulación fuerte`;
       } else if (miningMargin >= -5 && miningMargin < 15) {
         miningPoints = 1;
-        miningStatus = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs custo (${priceK}) · Zona favorável`;
-        miningStatusEN = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs cost (${priceK}) · Favourable zone`;
-        miningStatusES = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs costo (${priceK}) · Zona favorable`;
+        miningStatus = `BTC próximo do custo de mineração · Zona favorável`;
+        miningStatusEN = `BTC near mining cost · Favourable zone`;
+        miningStatusES = `BTC cerca del costo de minería · Zona favorable`;
       } else {
         miningPoints = -1;
-        miningStatus = `BTC +${miningMargin.toFixed(0)}% acima custo (${priceK}) · Sobreextendido`;
-        miningStatusEN = `BTC +${miningMargin.toFixed(0)}% above cost (${priceK}) · Over-extended`;
-        miningStatusES = `BTC +${miningMargin.toFixed(0)}% sobre costo (${priceK}) · Sobreextendido`;
+        miningStatus = `BTC bem acima do custo de mineração · Sobreextendido`;
+        miningStatusEN = `BTC well above mining cost · Over-extended`;
+        miningStatusES = `BTC muy por encima del costo de minería · Sobreextendido`;
       }
     } else {
       miningStatus = 'Sem dados de preço (CoinGecko)';
@@ -2675,44 +2709,33 @@ async function runBtcAnalysis() {
     // Normalizar score para 0-6 (pode ter negativos, mapear para display)
     const displayScore = Math.max(0, Math.min(6, totalScore + 1)); // shift para tornar positivo
     let verdict = 'neutral';
-    let summary = '';
+    let summaryPT = '', summaryEN = '', summaryES = '';
     const priceStr = btcPrice ? `$${Math.round(btcPrice).toLocaleString('en')}` : 'N/D';
-    const summaryLang = typeof currentLang !== 'undefined' ? currentLang : 'pt';
 
     if (totalScore >= 3) {
       verdict = 'good';
-      if (summaryLang === 'en') {
-        summary = `Current indicators (BTC at ${priceStr}) point to favourable accumulation conditions. The Fear & Greed index and on-chain data suggest the market is not in euphoria territory.`;
-      } else if (summaryLang === 'es') {
-        summary = `Los indicadores actuales (BTC a ${priceStr}) apuntan a condiciones favorables de acumulación. El Fear & Greed y los datos on-chain sugieren que el mercado no está en zona de euforia.`;
-      } else {
-        summary = `Os indicadores atuais (BTC a ${priceStr}) apontam para condições favoráveis de acumulação. O Fear & Greed e os dados on-chain sugerem que o mercado não está em zona de euforia.`;
-      }
+      summaryEN = `Current indicators (BTC at ${priceStr}) point to favourable accumulation conditions. The Fear & Greed index and on-chain data suggest the market is not in euphoria territory.`;
+      summaryES = `Los indicadores actuales (BTC a ${priceStr}) apuntan a condiciones favorables de acumulación. El Fear & Greed y los datos on-chain sugieren que el mercado no está en zona de euforia.`;
+      summaryPT = `Os indicadores atuais (BTC a ${priceStr}) apontam para condições favoráveis de acumulação. O Fear & Greed e os dados on-chain sugerem que o mercado não está em zona de euforia.`;
     } else if (totalScore >= 0) {
       verdict = 'neutral';
-      if (summaryLang === 'en') {
-        summary = `The market is in a neutral zone with BTC at ${priceStr}. DCA (Dollar-Cost Averaging) is the most prudent strategy in this mixed context.`;
-      } else if (summaryLang === 'es') {
-        summary = `El mercado se encuentra en zona neutra con BTC a ${priceStr}. El DCA (Dollar-Cost Averaging) es la estrategia más prudente en este contexto mixto.`;
-      } else {
-        summary = `O mercado encontra-se em zona neutra com BTC a ${priceStr}. DCA (Dollar-Cost Averaging) é a estratégia mais prudente neste contexto misto.`;
-      }
+      summaryEN = `The market is in a neutral zone with BTC at ${priceStr}. DCA (Dollar-Cost Averaging) is the most prudent strategy in this mixed context.`;
+      summaryES = `El mercado se encuentra en zona neutra con BTC a ${priceStr}. El DCA (Dollar-Cost Averaging) es la estrategia más prudente en este contexto mixto.`;
+      summaryPT = `O mercado encontra-se em zona neutra com BTC a ${priceStr}. DCA (Dollar-Cost Averaging) é a estratégia mais prudente neste contexto misto.`;
     } else {
       verdict = 'bad';
-      if (summaryLang === 'en') {
-        summary = `Several indicators signal overbought conditions or elevated risk with BTC at ${priceStr}. Caution recommended — wait for a pullback or continue moderate DCA.`;
-      } else if (summaryLang === 'es') {
-        summary = `Varios indicadores señalan sobrecompra o riesgo elevado con BTC a ${priceStr}. Se recomienda cautela — espera un pullback o continúa DCA moderado.`;
-      } else {
-        summary = `Vários indicadores sinalizam sobrecompra ou risco elevado com BTC a ${priceStr}. Cautela recomendada — aguarda pullback ou continua DCA moderado.`;
-      }
+      summaryEN = `Several indicators signal overbought conditions or elevated risk with BTC at ${priceStr}. Caution recommended — wait for a pullback or continue moderate DCA.`;
+      summaryES = `Varios indicadores señalan sobrecompra o riesgo elevado con BTC a ${priceStr}. Se recomienda cautela — espera un pullback o continúa DCA moderado.`;
+      summaryPT = `Vários indicadores sinalizam sobrecompra ou risco elevado com BTC a ${priceStr}. Cautela recomendada — aguarda pullback ou continua DCA moderado.`;
     }
 
     const result = {
       score: displayScore,
       rawScore: totalScore,
       verdict,
-      summary,
+      summaryPT,
+      summaryEN,
+      summaryES,
       indicators,
       btcPrice
     };
