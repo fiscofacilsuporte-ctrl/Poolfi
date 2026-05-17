@@ -673,6 +673,143 @@
   .hist-loading { text-align:center; font-size:12px; color:var(--text3); padding:8px 0; }
   .coingecko-credit { font-size:10px; color:var(--text3); text-align:right; margin-top:8px; }
   .coingecko-credit a { color:var(--text3); }
+
+  /* ── Bitcoin Timing Button ── */
+  .btc-timing-btn {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: linear-gradient(135deg, rgba(247,147,26,0.08), rgba(247,147,26,0.03));
+    border: 1px solid rgba(247,147,26,0.35);
+    border-radius: 14px; padding: 12px 20px;
+    cursor: pointer; font-family: var(--font);
+    transition: all 0.2s; text-align: left;
+    max-width: 340px; width: 100%;
+  }
+  .btc-timing-btn:hover {
+    border-color: rgba(247,147,26,0.7);
+    background: linear-gradient(135deg, rgba(247,147,26,0.13), rgba(247,147,26,0.06));
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(247,147,26,0.12);
+  }
+  .btc-timing-icon {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg, #f7931a, #ffb830);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: white;
+    box-shadow: 0 3px 12px rgba(247,147,26,0.3);
+  }
+  .btc-timing-label { flex: 1; }
+  .btc-timing-title { display: block; font-size: 13px; font-weight: 600; color: var(--text); }
+  .btc-timing-sub { display: block; font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .btc-timing-arrow { font-size: 16px; color: rgba(247,147,26,0.6); flex-shrink: 0; }
+
+  /* ── Bitcoin Modal ── */
+  .btc-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 300;
+    align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .btc-modal-overlay.open { display: flex; }
+  .btc-modal {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 16px; width: 100%; max-width: 480px;
+    max-height: 90vh; overflow-y: auto;
+    padding: 22px; animation: slideUp 0.25s ease;
+  }
+  .btc-modal-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .btc-modal-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, #f7931a, #ffb830);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; color: white;
+    flex-shrink: 0; box-shadow: 0 4px 14px rgba(247,147,26,0.35);
+  }
+  .btc-modal-title { font-size: 17px; font-weight: 700; color: var(--text); }
+  .btc-modal-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .btc-modal-close { background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; padding: 0; flex-shrink: 0; }
+
+  /* Spinner */
+  .btc-spinner {
+    width: 32px; height: 32px; border: 3px solid var(--border);
+    border-top-color: #f7931a; border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto;
+  }
+
+  /* Verdict box */
+  .btc-verdict-box {
+    border-radius: 14px; padding: 20px 16px;
+    text-align: center; margin-bottom: 16px;
+    border: 1px solid transparent;
+  }
+  .btc-verdict-box.good {
+    background: rgba(0,229,160,0.08); border-color: rgba(0,229,160,0.25);
+  }
+  .btc-verdict-box.neutral {
+    background: rgba(77,159,255,0.08); border-color: rgba(77,159,255,0.25);
+  }
+  .btc-verdict-box.bad {
+    background: rgba(255,77,106,0.08); border-color: rgba(255,77,106,0.25);
+  }
+  .btc-verdict-emoji { font-size: 36px; margin-bottom: 6px; }
+  .btc-verdict-text { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .btc-verdict-score { font-size: 13px; color: var(--text3); font-family: var(--mono); }
+
+  /* Score bar */
+  .btc-score-bar-wrap { margin-bottom: 18px; }
+  .btc-score-bar-bg {
+    height: 8px; background: var(--bg3); border-radius: 4px;
+    position: relative; overflow: hidden;
+  }
+  .btc-score-bar-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, #ff4d6a, #ffb830, #00e5a0);
+    background-size: 600px 100%; transition: width 0.8s ease;
+    position: absolute; left: 0; top: 0;
+  }
+  .btc-score-markers {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--text3); margin-top: 5px;
+  }
+
+  /* Indicators */
+  .btc-indicators {
+    display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;
+  }
+  .btc-indicator {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg3); border-radius: 10px; padding: 10px 12px;
+    border: 1px solid var(--border);
+  }
+  .btc-ind-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .btc-ind-name { font-size: 12px; font-weight: 600; color: var(--text2); flex: 1; }
+  .btc-ind-status { font-size: 11px; color: var(--text3); }
+  .btc-ind-point {
+    font-size: 11px; font-family: var(--mono); font-weight: 600;
+    padding: 2px 8px; border-radius: 6px;
+  }
+  .btc-ind-point.pos { background: rgba(0,229,160,0.1); color: var(--green); }
+  .btc-ind-point.neg { background: rgba(255,77,106,0.1); color: var(--red); }
+  .btc-ind-point.zero { background: var(--bg); color: var(--text3); }
+
+  /* Summary */
+  .btc-summary {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 13px; color: var(--text2); line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  /* Disclaimer */
+  .btc-disclaimer {
+    font-size: 10px; color: var(--text3);
+    line-height: 1.6; text-align: center;
+    padding: 0 4px;
+  }
 </style>
 </head>
 <body>
@@ -710,14 +847,80 @@
       <span class="source-tag"><span class="source-check">✅</span> Uniswap</span>
       <span class="source-tag"><span class="source-check">✅</span> Raydium</span>
       <span class="source-tag"><span class="source-check">✅</span> Orca</span>
-      <span class="source-tag"><span class="source-check">✅</span> Meteora</span>
       <span class="source-tag"><span class="source-check">✅</span> Aave</span>
-      <span class="source-tag"><span class="source-check">✅</span> Curve</span>
       <span class="source-tag"><span class="source-check">✅</span> Aerodrome</span>
       <span class="source-tag"><span class="source-check">✅</span> PancakeSwap</span>
-      <span class="source-tag"><span class="source-check">✅</span> GMX</span>
-      <span class="source-tag"><span class="source-check">✅</span> Pool Party</span>
+      <span class="source-tag" style="color:var(--text3);border-style:dashed">+ 30 protocolos auditados</span>
     </div>
+    <!-- Bitcoin Timing Button -->
+    <div style="display:flex;justify-content:center;margin:14px 0 4px">
+      <button class="btc-timing-btn" onclick="openBtcTiming()" id="btc-timing-btn">
+        <span class="btc-timing-icon">₿</span>
+        <span class="btc-timing-label" id="btc-timing-label">
+          <span class="btc-timing-title">Análise de Timing Bitcoin</span>
+          <span class="btc-timing-sub">On-chain + Mercado · Atualizado diariamente</span>
+        </span>
+        <span class="btc-timing-arrow">→</span>
+      </button>
+    </div>
+
+    <!-- Bitcoin Timing Modal -->
+    <div class="btc-modal-overlay" id="btc-modal-overlay" onclick="closeBtcModal(event)">
+      <div class="btc-modal">
+        <div class="btc-modal-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="btc-modal-icon">₿</div>
+            <div>
+              <div class="btc-modal-title">Timing Bitcoin</div>
+              <div class="btc-modal-subtitle">Análise multi-indicador · <span id="btc-modal-date">—</span></div>
+            </div>
+          </div>
+          <button class="btc-modal-close" onclick="document.getElementById('btc-modal-overlay').classList.remove('open')">✕</button>
+        </div>
+
+        <div id="btc-loading-state" style="text-align:center;padding:32px 0">
+          <div class="btc-spinner"></div>
+          <div style="font-size:13px;color:var(--text3);margin-top:12px">A analisar indicadores on-chain...</div>
+        </div>
+
+        <div id="btc-result-state" style="display:none">
+          <!-- Verdict badge -->
+          <div class="btc-verdict-box" id="btc-verdict-box">
+            <div class="btc-verdict-emoji" id="btc-verdict-emoji">—</div>
+            <div class="btc-verdict-text" id="btc-verdict-text">—</div>
+            <div class="btc-verdict-score" id="btc-verdict-score">—</div>
+          </div>
+
+          <!-- Score bar -->
+          <div class="btc-score-bar-wrap">
+            <div class="btc-score-bar-bg">
+              <div class="btc-score-bar-fill" id="btc-score-bar-fill"></div>
+              <div class="btc-score-markers">
+                <span>Mau</span><span>Neutro</span><span>Bom</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Indicators grid -->
+          <div class="btc-indicators" id="btc-indicators"></div>
+
+          <!-- Summary -->
+          <div class="btc-summary" id="btc-summary"></div>
+
+          <!-- Disclaimer -->
+          <div class="btc-disclaimer">
+            estas análises são geradas automaticamente com base em indicadores públicos. não constituem conselho de investimento. os mercados de criptomoedas envolvem riscos elevados e o utilizador é o único responsável pelas suas decisões de investimento.
+          </div>
+        </div>
+
+        <div id="btc-error-state" style="display:none;text-align:center;padding:24px">
+          <div style="font-size:32px;margin-bottom:8px">⚠️</div>
+          <div style="font-size:14px;color:var(--text3)" id="btc-error-msg">Erro ao analisar. Tenta novamente.</div>
+          <button onclick="runBtcAnalysis()" style="margin-top:14px;padding:8px 20px;border-radius:8px;border:1px solid var(--green);background:rgba(0,229,160,0.08);color:var(--green);cursor:pointer;font-family:var(--font);font-size:13px">↺ Tentar novamente</button>
+        </div>
+      </div>
+    </div>
+
     <div class="affiliate-row">
 
       <!-- Kraken affiliate -->
@@ -1961,6 +2164,192 @@ function initTheme() {
     document.body.classList.add('light-mode');
     const icon = document.getElementById('theme-icon');
     if (icon) icon.textContent = '☀️';
+  }
+}
+
+// ── Bitcoin Timing Analysis ─────────────────────────────────
+
+// Cache key for daily analysis
+const BTC_CACHE_KEY = 'btc_timing_cache';
+
+function getBtcCachedResult() {
+  try {
+    const raw = localStorage.getItem(BTC_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const today = new Date().toDateString();
+    if (parsed.date === today) return parsed;
+  } catch(e) {}
+  return null;
+}
+
+function setBtcCache(data) {
+  data.date = new Date().toDateString();
+  localStorage.setItem(BTC_CACHE_KEY, JSON.stringify(data));
+}
+
+function openBtcTiming() {
+  document.getElementById('btc-modal-overlay').classList.add('open');
+  const cached = getBtcCachedResult();
+  if (cached) {
+    showBtcResult(cached);
+  } else {
+    runBtcAnalysis();
+  }
+}
+
+function closeBtcModal(e) {
+  if (e.target === document.getElementById('btc-modal-overlay')) {
+    document.getElementById('btc-modal-overlay').classList.remove('open');
+  }
+}
+
+function showBtcLoading() {
+  document.getElementById('btc-loading-state').style.display = 'block';
+  document.getElementById('btc-result-state').style.display = 'none';
+  document.getElementById('btc-error-state').style.display = 'none';
+}
+
+function showBtcError(msg) {
+  document.getElementById('btc-loading-state').style.display = 'none';
+  document.getElementById('btc-result-state').style.display = 'none';
+  document.getElementById('btc-error-state').style.display = 'block';
+  document.getElementById('btc-error-msg').textContent = msg || 'Erro ao analisar. Tenta novamente.';
+}
+
+function showBtcResult(data) {
+  document.getElementById('btc-loading-state').style.display = 'none';
+  document.getElementById('btc-error-state').style.display = 'none';
+  document.getElementById('btc-result-state').style.display = 'block';
+
+  const now = new Date();
+  document.getElementById('btc-modal-date').textContent = now.toLocaleDateString('pt-PT', {day:'numeric',month:'short',year:'numeric'});
+
+  // Verdict
+  const verdictBox = document.getElementById('btc-verdict-box');
+  const emoji = document.getElementById('btc-verdict-emoji');
+  const text = document.getElementById('btc-verdict-text');
+  const score = document.getElementById('btc-verdict-score');
+
+  verdictBox.className = 'btc-verdict-box';
+  if (data.verdict === 'good') {
+    verdictBox.classList.add('good');
+    emoji.textContent = '🟢';
+    text.textContent = 'Boa Altura para Comprar';
+    text.style.color = 'var(--green)';
+  } else if (data.verdict === 'neutral') {
+    verdictBox.classList.add('neutral');
+    emoji.textContent = '🟡';
+    text.textContent = 'Neutro — Considera DCA';
+    text.style.color = 'var(--blue)';
+  } else {
+    verdictBox.classList.add('bad');
+    emoji.textContent = '🔴';
+    text.textContent = 'Má Altura para Comprar';
+    text.style.color = 'var(--red)';
+  }
+  score.textContent = 'Pontuação: ' + data.score + ' / 6 pontos';
+
+  // Score bar (0-6 mapped to 0-100%)
+  const pct = Math.round((data.score / 6) * 100);
+  document.getElementById('btc-score-bar-fill').style.width = pct + '%';
+
+  // Indicators
+  const indEl = document.getElementById('btc-indicators');
+  indEl.innerHTML = (data.indicators || []).map(ind => {
+    const dotColor = ind.points > 0 ? '#00e5a0' : ind.points < 0 ? '#ff4d6a' : '#4a5a7a';
+    const ptClass = ind.points > 0 ? 'pos' : ind.points < 0 ? 'neg' : 'zero';
+    const ptLabel = ind.points > 0 ? '+1' : ind.points < 0 ? '-1' : '0';
+    return `
+      <div class="btc-indicator">
+        <div class="btc-ind-dot" style="background:${dotColor}"></div>
+        <div class="btc-ind-name">${ind.name}</div>
+        <div class="btc-ind-status">${ind.status}</div>
+        <div class="btc-ind-point ${ptClass}">${ptLabel}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Summary
+  document.getElementById('btc-summary').textContent = data.summary || '';
+}
+
+async function runBtcAnalysis() {
+  showBtcLoading();
+
+  const today = new Date().toLocaleDateString('pt-PT', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  const prompt = `Hoje é ${today}. És um analista de Bitcoin on-chain. Vais analisar 6 indicadores e atribuir pontos (+1, -1 ou 0 conforme as regras abaixo). No final dás um veredicto de timing de compra.
+
+INDICADORES E REGRAS DE PONTUAÇÃO:
+
+1. Farside BTC ETF Flows (https://farside.co.uk/btc/): Analisa os fluxos recentes dos ETFs de Bitcoin institucionais. Se houver mais compras institucionais (inflows positivos dominantes): +1 ponto. Se houver mais vendas (outflows ou negativo): -1 ponto.
+
+2. MVRV Z-Score (https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/): Avalia se o Bitcoin está sobre ou subvalorizado relativamente ao preço realizado. Se o Z-Score estiver positivo/favorável para compra (zona verde/amarela, não na zona de euforia vermelha): +1 ponto. Se estiver na zona de venda/sobrevalorizado: -1 ponto.
+
+3. Fear & Greed Index (https://coinmarketcap.com/es/charts/fear-and-greed-index/): Se o índice estiver vermelho ou laranja (Medo Extremo ou Medo = oportunidade de compra): +1 ponto. Se estiver verde (Ganância Extrema = sobrecomprado): -1 ponto.
+
+4. Pi Cycle Top Indicator (https://www.bitcoinmagazinepro.com/charts/pi-cycle-top-indicator/): Se os indicadores não indicarem um topo de ciclo próximo (as médias móveis não estão prestes a cruzar para cima): +1 ponto. Se indicar topo próximo: 0 pontos (não subtraímos aqui).
+
+5. Bull Market Peak Signals (https://www.coinglass.com/bull-market-peak-signals): Se a maioria dos sinais estiver verde e próximos de 100 (zona HODL): +1 ponto. Se menos de 80% ou em zona de venda: -1 ponto.
+
+6. Custo de Mineração vs Preço (https://en.macromicro.me/charts/29435/bitcoin-production-total-cost): Se o preço atual do Bitcoin estiver 10% ou mais acima do custo médio de mineração (mineiros em ganho claro): -1 ponto (má altura, preço alto). Se o preço estiver próximo ou abaixo do custo de mineração: +1 ponto (suporte fundamental).
+
+VEREDICTO FINAL:
+- 5 ou 6 pontos: "good" (Boa Altura para Comprar)
+- 3 ou 4 pontos: "neutral" (Neutro — Considera DCA)
+- 0, 1 ou 2 pontos: "bad" (Má Altura para Comprar)
+
+Com base no teu conhecimento atualizado destes indicadores para hoje ${today}, responde APENAS em JSON válido, sem texto extra, sem markdown, no formato exato:
+
+{
+  "score": <número entre -6 e 6>,
+  "verdict": "<good|neutral|bad>",
+  "summary": "<resumo em 2 frases em português explicando o contexto atual do mercado>",
+  "indicators": [
+    {"name": "Flows ETF Institucionais", "status": "<breve estado>", "points": <-1, 0 ou 1>},
+    {"name": "MVRV Z-Score", "status": "<breve estado>", "points": <-1, 0 ou 1>},
+    {"name": "Fear & Greed Index", "status": "<breve estado>", "points": <-1, 0 ou 1>},
+    {"name": "Pi Cycle Top Indicator", "status": "<breve estado>", "points": <0 ou 1>},
+    {"name": "Bull Market Peak Signals", "status": "<breve estado>", "points": <-1, 0 ou 1>},
+    {"name": "Custo de Mineração", "status": "<breve estado>", "points": <-1, 0 ou 1>}
+  ]
+}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API error ' + response.status);
+    const data = await response.json();
+
+    // Extract text from content blocks
+    const fullText = (data.content || [])
+      .filter(b => b.type === 'text')
+      .map(b => b.text)
+      .join('');
+
+    // Parse JSON from response
+    const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Resposta inválida da análise');
+    const result = JSON.parse(jsonMatch[0]);
+
+    // Validate and clamp score to 0-6 range for display
+    result.score = Math.max(0, Math.min(6, result.score));
+
+    setBtcCache(result);
+    showBtcResult(result);
+  } catch(err) {
+    console.error('BTC timing error:', err);
+    showBtcError('Não foi possível obter a análise. Tenta novamente em breve.');
   }
 }
 
