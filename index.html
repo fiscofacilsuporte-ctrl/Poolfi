@@ -905,8 +905,8 @@
           <div style="display:flex;align-items:center;gap:10px">
             <div class="btc-modal-icon">₿</div>
             <div>
-              <div class="btc-modal-title">Timing Bitcoin</div>
-              <div class="btc-modal-subtitle">Análise multi-indicador · <span id="btc-modal-date">—</span></div>
+              <div class="btc-modal-title" id="btc-modal-title-text">Timing Bitcoin</div>
+              <div class="btc-modal-subtitle" id="btc-modal-subtitle-text">Análise multi-indicador · <span id="btc-modal-date">—</span></div>
             </div>
           </div>
           <button class="btc-modal-close" onclick="document.getElementById('btc-modal-overlay').classList.remove('open')">✕</button>
@@ -2290,6 +2290,13 @@ function showBtcResult(data) {
 
   const now = new Date();
   document.getElementById('btc-modal-date').textContent = now.toLocaleDateString('pt-PT', {day:'numeric',month:'short',year:'numeric'});
+  const btcLangTitle = typeof currentLang !== 'undefined' ? currentLang : 'pt';
+  const BTC_TITLE = { pt: 'Timing Bitcoin', en: 'Bitcoin Timing', es: 'Timing Bitcoin' };
+  const BTC_SUB = { pt: 'Análise multi-indicador', en: 'Multi-indicator analysis', es: 'Análisis multi-indicador' };
+  const titleEl = document.getElementById('btc-modal-title-text');
+  const subEl = document.getElementById('btc-modal-subtitle-text');
+  if (titleEl) titleEl.childNodes[0].textContent = BTC_TITLE[btcLangTitle] || 'Bitcoin Timing';
+  if (subEl) subEl.childNodes[0].textContent = (BTC_SUB[btcLangTitle] || 'Multi-indicator analysis') + ' · ';
 
   // Verdict
   const verdictBox = document.getElementById('btc-verdict-box');
@@ -2298,23 +2305,32 @@ function showBtcResult(data) {
   const score = document.getElementById('btc-verdict-score');
 
   verdictBox.className = 'btc-verdict-box';
+  const btcLang = typeof currentLang !== 'undefined' ? currentLang : 'pt';
+  const VERDICT_LABELS = {
+    good:    { pt: 'Boa Altura para Comprar',  en: 'Good Time to Buy',     es: 'Buen Momento para Comprar' },
+    neutral: { pt: 'Neutro — Considera DCA',   en: 'Neutral — Consider DCA', es: 'Neutro — Considera DCA' },
+    bad:     { pt: 'Má Altura para Comprar',   en: 'Poor Time to Buy',     es: 'Mal Momento para Comprar' },
+  };
+  const SCORE_LABEL = { pt: 'Pontuação', en: 'Score', es: 'Puntuación' };
+  const POINTS_LABEL = { pt: 'pontos', en: 'points', es: 'puntos' };
   if (data.verdict === 'good') {
     verdictBox.classList.add('good');
     emoji.textContent = '🟢';
-    text.textContent = 'Boa Altura para Comprar';
+    text.textContent = VERDICT_LABELS.good[btcLang] || VERDICT_LABELS.good.en;
     text.style.color = 'var(--green)';
   } else if (data.verdict === 'neutral') {
     verdictBox.classList.add('neutral');
     emoji.textContent = '🟡';
-    text.textContent = 'Neutro — Considera DCA';
+    text.textContent = VERDICT_LABELS.neutral[btcLang] || VERDICT_LABELS.neutral.en;
     text.style.color = 'var(--blue)';
   } else {
     verdictBox.classList.add('bad');
     emoji.textContent = '🔴';
-    text.textContent = 'Má Altura para Comprar';
+    text.textContent = VERDICT_LABELS.bad[btcLang] || VERDICT_LABELS.bad.en;
     text.style.color = 'var(--red)';
   }
-  score.textContent = 'Pontuação: ' + (data.rawScore !== undefined ? data.rawScore : data.score) + ' / 6 pontos';
+  const rawSc = data.rawScore !== undefined ? data.rawScore : data.score;
+  score.textContent = (SCORE_LABEL[btcLang]||'Score') + ': ' + rawSc + ' / 6 ' + (POINTS_LABEL[btcLang]||'points');
 
   // Score bar: map rawScore (-6 to +6) → 0-100%
   const raw = data.rawScore !== undefined ? data.rawScore : data.score;
@@ -2327,11 +2343,16 @@ function showBtcResult(data) {
     const dotColor = ind.points > 0 ? '#00e5a0' : ind.points < 0 ? '#ff4d6a' : '#4a5a7a';
     const ptClass = ind.points > 0 ? 'pos' : ind.points < 0 ? 'neg' : 'zero';
     const ptLabel = ind.points > 0 ? '+1' : ind.points < 0 ? '-1' : '0';
+    // Use correct language
+    const lang = typeof currentLang !== 'undefined' ? currentLang : 'pt';
+    const indName = lang === 'en' ? (ind.nameEN || ind.name) : lang === 'es' ? (ind.nameES || ind.name) : ind.name;
+    const indStatus = lang === 'en' ? (ind.statusEN || ind.status) : lang === 'es' ? (ind.statusES || ind.status) : ind.status;
+    const sourceTag = ind.source ? `<span style="font-size:9px;color:var(--text3);margin-left:4px">· ${ind.source}</span>` : '';
     return `
       <div class="btc-indicator">
         <div class="btc-ind-dot" style="background:${dotColor}"></div>
-        <div class="btc-ind-name">${ind.name}</div>
-        <div class="btc-ind-status">${ind.status}</div>
+        <div class="btc-ind-name">${indName}${sourceTag}</div>
+        <div class="btc-ind-status">${indStatus}</div>
         <div class="btc-ind-point ${ptClass}">${ptLabel}</div>
       </div>
     `;
@@ -2374,7 +2395,10 @@ async function runBtcAnalysis() {
     } else {
       fgStatus = 'Sem dados disponíveis';
     }
-    indicators.push({ name: 'Fear & Greed Index', status: fgStatus, points: fgPoints });
+    indicators.push({ 
+      name: 'Fear & Greed Index', nameEN: 'Fear & Greed Index', nameES: 'Índice Miedo & Codicia',
+      status: fgStatus, statusEN: fgStatus, statusES: fgStatus, points: fgPoints 
+    });
     totalScore += fgPoints;
 
     // ── 2. Bitcoin preço atual vs estimativas on-chain (CoinGecko — CORS ok) ──
@@ -2402,10 +2426,15 @@ async function runBtcAnalysis() {
         piPoints = 1;
         piStatus = `${athDropPct.toFixed(0)}% abaixo do ATH · Sem sinais de topo`;
       }
-      indicators.push({ name: 'Pi Cycle / Distância ATH', status: piStatus, points: piPoints });
+      indicators.push({ 
+        name: 'Pi Cycle / Distância ATH', nameEN: 'Pi Cycle / ATH Distance', nameES: 'Pi Cycle / Distancia ATH',
+        status: piStatus, statusEN: piStatus.replace('abaixo do ATH','below ATH').replace('Sem sinais de topo','No top signals').replace('Próximo do ATH','Near ATH'),
+        statusES: piStatus.replace('abaixo do ATH','bajo el ATH').replace('Sem sinais de topo','Sin señales de techo').replace('Próximo do ATH','Cerca del ATH'),
+        points: piPoints 
+      });
       totalScore += piPoints;
     } catch(e) {
-      indicators.push({ name: 'Pi Cycle / Distância ATH', status: 'Sem dados', points: 0 });
+      indicators.push({ name: 'Pi Cycle / Distância ATH', nameEN: 'Pi Cycle / ATH Distance', nameES: 'Pi Cycle / Distancia ATH', status: 'Sem dados', statusEN: 'No data', statusES: 'Sin datos', points: 0 });
     }
 
     // ── 3. MVRV Z-Score proxy via preço e variação ──
@@ -2427,31 +2456,63 @@ async function runBtcAnalysis() {
     } else {
       mvrvStatus = 'Sem dados disponíveis';
     }
-    indicators.push({ name: 'MVRV Z-Score (proxy)', status: mvrvStatus, points: mvrvPoints });
+    indicators.push({ 
+      name: 'MVRV Z-Score (proxy)', nameEN: 'MVRV Z-Score (proxy)', nameES: 'MVRV Z-Score (proxy)',
+      status: mvrvStatus, 
+      statusEN: mvrvStatus.replace('esta semana','this week').replace('neutro','neutral').replace('sobrevalorizado','overvalued').replace('subvalorizado','undervalued'),
+      statusES: mvrvStatus.replace('esta semana','esta semana').replace('neutro','neutro').replace('sobrevalorizado','sobrevaluado').replace('subvalorizado','subvaluado'),
+      points: mvrvPoints 
+    });
     totalScore += mvrvPoints;
 
     // ── 4. Custo de Mineração vs Preço ──
-    // Custo médio de mineração estimado: ~$45,000-55,000 (varia com dificuldade e energia)
-    // Fontes: MacroMicro / CoinShares reports. Usamos $50,000 como baseline 2025.
-    const MINING_COST_ESTIMATE = 50000;
+    // Fonte: MacroMicro (en.macromicro.me/charts/29435) — dados de 8 Mai 2026
+    // Custo total de produção BTC: ~$82,702 (inclui energia + hardware + overhead)
+    // BTC actual: ~$80,000 → mineiros em ligeira perda → zona de suporte histórico
+    // Lógica: quando BTC < custo mineração = sinal de compra forte (miners capitulam)
+    //         quando BTC 0-20% acima custo = neutro/favorável
+    //         quando BTC > 20% acima custo = sobrecompra / má altura
+    const MINING_COST_2026 = 82700; // MacroMicro total production cost Mai 2026
     let miningPoints = 0;
     let miningStatus = '';
+    let miningStatusEN = '';
+    let miningStatusES = '';
     if (btcPrice !== null) {
-      const miningMargin = ((btcPrice - MINING_COST_ESTIMATE) / MINING_COST_ESTIMATE) * 100;
-      if (miningMargin >= 10) {
-        miningPoints = -1;
-        miningStatus = `BTC ${miningMargin.toFixed(0)}% acima custo mineiro · Má altura`;
-      } else if (miningMargin < 0) {
+      const miningMargin = ((btcPrice - MINING_COST_2026) / MINING_COST_2026) * 100;
+      if (miningMargin < -5) {
+        // BTC below mining cost → very bullish signal (miner capitulation = historical bottom)
         miningPoints = 1;
-        miningStatus = `BTC abaixo do custo de mineração · Suporte forte`;
+        miningStatus = `BTC abaixo custo mineração ($${Math.round(MINING_COST_2026/1000)}k) · Sinal de acumulação`;
+        miningStatusEN = `BTC below mining cost ($${Math.round(MINING_COST_2026/1000)}k) · Strong buy signal`;
+        miningStatusES = `BTC bajo costo de minería ($${Math.round(MINING_COST_2026/1000)}k) · Señal de acumulación`;
+      } else if (miningMargin >= -5 && miningMargin < 15) {
+        // Near breakeven → neutral/slightly bullish
+        miningPoints = 1;
+        miningStatus = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs custo mineração ($${Math.round(MINING_COST_2026/1000)}k) · Zona favorável`;
+        miningStatusEN = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs mining cost ($${Math.round(MINING_COST_2026/1000)}k) · Favourable zone`;
+        miningStatusES = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs costo minería ($${Math.round(MINING_COST_2026/1000)}k) · Zona favorable`;
       } else {
-        miningPoints = 1;
-        miningStatus = `BTC ~${miningMargin.toFixed(0)}% acima custo mineiro · Zona neutra-favorável`;
+        // More than 15% above → extended, bearish signal
+        miningPoints = -1;
+        miningStatus = `BTC +${miningMargin.toFixed(0)}% acima custo mineração ($${Math.round(MINING_COST_2026/1000)}k) · Sobreextendido`;
+        miningStatusEN = `BTC +${miningMargin.toFixed(0)}% above mining cost ($${Math.round(MINING_COST_2026/1000)}k) · Over-extended`;
+        miningStatusES = `BTC +${miningMargin.toFixed(0)}% sobre costo minería ($${Math.round(MINING_COST_2026/1000)}k) · Sobreextendido`;
       }
     } else {
       miningStatus = 'Sem dados';
+      miningStatusEN = 'No data';
+      miningStatusES = 'Sin datos';
     }
-    indicators.push({ name: 'Custo de Mineração vs Preço', status: miningStatus, points: miningPoints });
+    indicators.push({ 
+      name: 'Custo de Mineração vs Preço', 
+      nameEN: 'Mining Cost vs Price',
+      nameES: 'Costo Minería vs Precio',
+      status: miningStatus, 
+      statusEN: miningStatusEN,
+      statusES: miningStatusES,
+      points: miningPoints,
+      source: 'MacroMicro'
+    });
     totalScore += miningPoints;
 
     // ── 5. ETF Flows Institucionais (Farside proxy via variação 24h e volume) ──
@@ -2481,7 +2542,13 @@ async function runBtcAnalysis() {
     } catch(e) {
       etfStatus = 'Farside ETF não acessível — neutro';
     }
-    indicators.push({ name: 'Flows ETF Institucionais', status: etfStatus, points: etfPoints });
+    indicators.push({ 
+      name: 'Flows ETF Institucionais', nameEN: 'Institutional ETF Flows', nameES: 'Flujos ETF Institucionales',
+      status: etfStatus,
+      statusEN: etfStatus.replace('Fluxo positivo','Positive flow').replace('Fluxo negativo','Negative flow').replace('Fluxo misto','Mixed flow').replace('Dados Farside pendentes','Farside data pending').replace('acumulação institucional','institutional accumulation').replace('distribuição','distribution'),
+      statusES: etfStatus.replace('Fluxo positivo','Flujo positivo').replace('Fluxo negativo','Flujo negativo').replace('Fluxo misto','Flujo mixto').replace('Dados Farside pendentes','Datos Farside pendientes').replace('acumulação institucional','acumulación institucional').replace('distribuição','distribución'),
+      points: etfPoints 
+    });
     totalScore += etfPoints;
 
     // ── 6. Bull Market Signals (CoinGlass proxy via dominância + RSI estimado) ──
@@ -2505,7 +2572,13 @@ async function runBtcAnalysis() {
     } catch(e) {
       peakStatus = 'Sem dados de dominância';
     }
-    indicators.push({ name: 'Bull Market Peak Signals', status: peakStatus, points: peakPoints });
+    indicators.push({ 
+      name: 'Bull Market Peak Signals', nameEN: 'Bull Market Peak Signals', nameES: 'Señales de Techo Bull Market',
+      status: peakStatus,
+      statusEN: peakStatus.replace('Dominância BTC','BTC Dominance').replace('Sinais de topo distantes','Top signals distant').replace('Atenção','Caution').replace('Alta dominância BTC','High BTC dominance'),
+      statusES: peakStatus.replace('Dominância BTC','Dominancia BTC').replace('Sinais de topo distantes','Señales de techo distantes').replace('Atenção','Atención').replace('Alta dominância BTC','Alta dominancia BTC'),
+      points: peakPoints 
+    });
     totalScore += peakPoints;
 
     // ── Calcular veredicto ──
