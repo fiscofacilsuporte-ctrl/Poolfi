@@ -2536,12 +2536,18 @@ async function runBtcAnalysis() {
       // ATH drop heurístico: se >50% abaixo do ATH = zona de acumulação (Pi Cycle proxy)
       let piPoints = 0;
       let piStatus = '';
+      let piStatusEN = '';
+      let piStatusES = '';
       if (athDropPct > 50) {
         piPoints = 1;
         piStatus = `${athDropPct.toFixed(0)}% abaixo do ATH · Zona de acumulação`;
+        piStatusEN = `${athDropPct.toFixed(0)}% below ATH · Accumulation zone`;
+        piStatusES = `${athDropPct.toFixed(0)}% bajo el ATH · Zona de acumulación`;
       } else if (athDropPct < 10) {
         piPoints = 0;
         piStatus = `Próximo do ATH (${athDropPct.toFixed(0)}% abaixo) · Topo possível`;
+        piStatusEN = `Near ATH (${athDropPct.toFixed(0)}% below) · Possible top`;
+        piStatusES = `Cerca del ATH (${athDropPct.toFixed(0)}% abajo) · Posible techo`;
       } else {
         piPoints = 1;
         piStatus = `${athDropPct.toFixed(0)}% abaixo do ATH · Sem sinais de topo`;
@@ -2563,16 +2569,24 @@ async function runBtcAnalysis() {
     // Preço muito acima da média (>30% em 7d) = sobrevalorizado; queda = subvalorizado
     let mvrvPoints = 0;
     let mvrvStatus = '';
+    let mvrvStatusEN = '';
+    let mvrvStatusES = '';
     if (btcPrice !== null) {
       if (btcChange7d > 25) {
         mvrvPoints = -1;
         mvrvStatus = `+${btcChange7d.toFixed(1)}% esta semana · Possível sobrevalorização`;
+        mvrvStatusEN = `+${btcChange7d.toFixed(1)}% this week · Possible overvaluation`;
+        mvrvStatusES = `+${btcChange7d.toFixed(1)}% esta semana · Posible sobrevaluación`;
       } else if (btcChange7d < -15) {
         mvrvPoints = 1;
         mvrvStatus = `${btcChange7d.toFixed(1)}% esta semana · Zona de valor on-chain`;
+        mvrvStatusEN = `${btcChange7d.toFixed(1)}% this week · On-chain value zone`;
+        mvrvStatusES = `${btcChange7d.toFixed(1)}% esta semana · Zona de valor on-chain`;
       } else {
         mvrvPoints = 0;
         mvrvStatus = `${btcChange7d > 0 ? '+' : ''}${btcChange7d.toFixed(1)}% esta semana · MVRV neutro`;
+        mvrvStatusEN = `${btcChange7d > 0 ? '+' : ''}${btcChange7d.toFixed(1)}% this week · MVRV neutral`;
+        mvrvStatusES = `${btcChange7d > 0 ? '+' : ''}${btcChange7d.toFixed(1)}% esta semana · MVRV neutro`;
       }
     } else {
       mvrvStatus = 'Sem dados disponíveis';
