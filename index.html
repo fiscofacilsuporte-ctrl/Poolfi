@@ -5,14 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0e1a" />
 <meta name="description" content="PoolFi — Acompanha APYs de pools DeFi em tempo real. Solana, Ethereum, BNB Chain, Arbitrum e mais." />
-<meta property="og:title" content="PoolFi — DeFi APY Tracker"/>
-<meta property="og:description" content="Real-time APY from audited DeFi pools. Solana, Ethereum, Arbitrum and more. No wallet needed."/>
-<meta property="og:url" content="https://poolfi.xyz"/>
-<meta property="og:type" content="website"/>
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:site" content="@poolfi_xyz"/>
-<meta name="twitter:title" content="PoolFi — DeFi APY Tracker"/>
-<meta name="twitter:description" content="Real-time APY from audited DeFi pools. No wallet needed."/>
 <title>PoolFi — DeFi APY Tracker</title>
 <link rel="manifest" href="#" />
 <!-- Umami Analytics — privacy-first, sem cookies, GDPR compliant -->
@@ -1121,8 +1113,10 @@
       <div class="contact-icon">✉️</div>
       <span id="contact-label">Poolfi.support@proton.me</span>
     </a>
-    <a href="https://x.com/poolfi_xyz" target="_blank" rel="noopener" class="contact-btn" style="margin-top:-4px">
-      <div class="contact-icon" style="background:linear-gradient(135deg,#000,#333)">𝕏</div>
+    <a href="https://x.com/poolfi_xyz" target="_blank" rel="noopener" class="contact-btn">
+      <div class="contact-icon" style="background:linear-gradient(135deg,#000,#333);">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </div>
       <span>@poolfi_xyz · Follow us on X</span>
     </a>
     <p class="footer-legal" id="footer-legal">
@@ -2443,12 +2437,7 @@ function showBtcResult(data) {
   }).join('');
 
   // Summary
-  // Pick summary in correct language
-  const sumLang = typeof currentLang !== 'undefined' ? currentLang : 'pt';
-  const displaySummary = sumLang === 'en' ? (data.summaryEN || data.summary) :
-                         sumLang === 'es' ? (data.summaryES || data.summary) :
-                         (data.summaryPT || data.summary);
-  document.getElementById('btc-summary').textContent = displaySummary || '';
+  document.getElementById('btc-summary').textContent = data.summary || '';
 }
 
 async function runBtcAnalysis() {
@@ -2472,14 +2461,10 @@ async function runBtcAnalysis() {
     let fgStatus = '';
     let fgStatusEN = '';
     let fgStatusES = '';
-    let fgStatusEN = '';
-    let fgStatusES = '';
     if (fgValue !== null) {
       if (fgValue <= 45) {
         fgPoints = 1;
         fgStatus = `Medo — ${fgValue}/100 · Oportunidade histórica`;
-        fgStatusEN = `Fear — ${fgValue}/100 · Historical opportunity`;
-        fgStatusES = `Miedo — ${fgValue}/100 · Oportunidad histórica`;
         fgStatusEN = `Fear — ${fgValue}/100 · Historical opportunity`;
         fgStatusES = `Miedo — ${fgValue}/100 · Oportunidad histórica`;
       } else if (fgValue >= 75) {
@@ -2487,13 +2472,9 @@ async function runBtcAnalysis() {
         fgStatus = `Ganância Extrema — ${fgValue}/100 · Mercado sobrecomprado`;
         fgStatusEN = `Extreme Greed — ${fgValue}/100 · Market overbought`;
         fgStatusES = `Codicia Extrema — ${fgValue}/100 · Mercado sobrecomprado`;
-        fgStatusEN = `Extreme Greed — ${fgValue}/100 · Market overbought`;
-        fgStatusES = `Codicia Extrema — ${fgValue}/100 · Mercado sobrecomprado`;
       } else {
         fgPoints = 0;
         fgStatus = `Neutro — ${fgValue}/100 · ${fgLabel}`;
-        fgStatusEN = `Neutral — ${fgValue}/100 · ${fgLabel}`;
-        fgStatusES = `Neutro — ${fgValue}/100 · ${fgLabel}`;
         fgStatusEN = `Neutral — ${fgValue}/100 · ${fgLabel}`;
         fgStatusES = `Neutro — ${fgValue}/100 · ${fgLabel}`;
       }
@@ -2576,42 +2557,49 @@ async function runBtcAnalysis() {
     // Lógica: quando BTC < custo mineração = sinal de compra forte (miners capitulam)
     //         quando BTC 0-15% acima custo = neutro/favorável
     //         quando BTC > 15% acima custo = sobreextendido
-    // Mining cost: MacroMicro ~$82,700 (Mai 2026)
-    // +1 if BTC price >10% above mining cost (miners clearly profitable)
-    // 0  if within 10% either way (breakeven zone)
-    // -1 if mining cost >10% above BTC price (miners losing)
-    const MINING_COST = 82700; // MacroMicro total production cost Mai 2026
+    const MINING_COST = 82702.96; // MacroMicro · 2026-05-08 · USD
+    const MINING_DATE = '08 Mai 2026';
+    const MINING_DATE_EN = 'May 8, 2026';
+    const MINING_DATE_ES = '8 May 2026';
     let miningPoints = 0;
     let miningStatus = '';
     let miningStatusEN = '';
     let miningStatusES = '';
     if (btcPrice !== null) {
-      const diff = ((btcPrice - MINING_COST) / MINING_COST) * 100;
-      if (diff > 10) {
+      const miningMargin = ((btcPrice - MINING_COST) / MINING_COST) * 100;
+      const priceK = `$${Math.round(MINING_COST/1000)}k`;
+      if (miningMargin < -5) {
         miningPoints = 1;
-        miningStatus   = 'Preço BTC acima custo mineração · Mineiros rentáveis';
-        miningStatusEN = 'BTC price above mining cost · Miners profitable';
-        miningStatusES = 'Precio BTC sobre costo minería · Mineros rentables';
-      } else if (diff < -10) {
-        miningPoints = -1;
-        miningStatus   = 'Custo mineração acima preço BTC · Mineiros em perda';
-        miningStatusEN = 'Mining cost above BTC price · Miners losing money';
-        miningStatusES = 'Costo minería sobre precio BTC · Mineros en pérdida';
+        miningStatus = `BTC abaixo custo mineração (${priceK}) · Sinal de acumulação forte`;
+        miningStatusEN = `BTC below mining cost (${priceK}) · Strong accumulation signal`;
+        miningStatusES = `BTC bajo costo de minería (${priceK}) · Señal de acumulación fuerte`;
+      } else if (miningMargin >= -5 && miningMargin < 15) {
+        miningPoints = 1;
+        miningStatus = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs custo (${priceK}) · Zona favorável`;
+        miningStatusEN = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs cost (${priceK}) · Favourable zone`;
+        miningStatusES = `BTC ~${miningMargin >= 0 ? '+' : ''}${miningMargin.toFixed(0)}% vs costo (${priceK}) · Zona favorable`;
       } else {
-        miningPoints = 0;
-        miningStatus   = 'Custo mineração próximo do preço BTC · Zona de equilíbrio';
-        miningStatusEN = 'Mining cost near BTC price · Breakeven zone';
-        miningStatusES = 'Costo minería cerca del precio BTC · Zona de equilibrio';
+        miningPoints = -1;
+        miningStatus = `BTC +${miningMargin.toFixed(0)}% acima custo (${priceK}) · Sobreextendido`;
+        miningStatusEN = `BTC +${miningMargin.toFixed(0)}% above cost (${priceK}) · Over-extended`;
+        miningStatusES = `BTC +${miningMargin.toFixed(0)}% sobre costo (${priceK}) · Sobreextendido`;
       }
     } else {
-      miningStatus   = 'Sem dados de preço';
-      miningStatusEN = 'No price data';
-      miningStatusES = 'Sin datos de precio';
+      miningStatus = 'Sem dados de preço (CoinGecko)';
+      miningStatusEN = 'No price data (CoinGecko)';
+      miningStatusES = 'Sin datos de precio (CoinGecko)';
     }
-    indicators.push({
-      name: 'Custo de Mineração vs Preço', nameEN: 'Mining Cost vs Price', nameES: 'Costo Minería vs Precio',
-      status: miningStatus, statusEN: miningStatusEN, statusES: miningStatusES,
-      points: miningPoints, source: 'MacroMicro'
+    indicators.push({ 
+      name: 'Custo de Mineração vs Preço', 
+      nameEN: 'Mining Cost vs Price',
+      nameES: 'Costo Minería vs Precio',
+      status: miningStatus, 
+      statusEN: miningStatusEN,
+      statusES: miningStatusES,
+      points: miningPoints,
+      source: `MacroMicro · ${MINING_DATE}`,
+      sourceEN: `MacroMicro · ${MINING_DATE_EN}`,
+      sourceES: `MacroMicro · ${MINING_DATE_ES}`,
     });
     totalScore += miningPoints;
 
@@ -2720,32 +2708,11 @@ async function runBtcAnalysis() {
       }
     }
 
-    // Store all language summaries so modal can pick correct one at display time
-    let summaryEN = '';
-    let summaryES = '';
-    let summaryPT = '';
-    if (totalScore >= 3) {
-      summaryEN = `Current indicators (BTC at ${priceStr}) point to favourable accumulation conditions. The Fear & Greed index and on-chain data suggest the market is not in euphoria territory.`;
-      summaryES = `Los indicadores actuales (BTC a ${priceStr}) apuntan a condiciones favorables de acumulación. El Fear & Greed y los datos on-chain sugieren que el mercado no está en zona de euforia.`;
-      summaryPT = `Os indicadores atuais (BTC a ${priceStr}) apontam para condições favoráveis de acumulação. O Fear & Greed e os dados on-chain sugerem que o mercado não está em zona de euforia.`;
-    } else if (totalScore >= 0) {
-      summaryEN = `The market is in a neutral zone with BTC at ${priceStr}. DCA (Dollar-Cost Averaging) is the most prudent strategy in this mixed context.`;
-      summaryES = `El mercado se encuentra en zona neutra con BTC a ${priceStr}. El DCA (Dollar-Cost Averaging) es la estrategia más prudente en este contexto mixto.`;
-      summaryPT = `O mercado encontra-se em zona neutra com BTC a ${priceStr}. DCA (Dollar-Cost Averaging) é a estratégia mais prudente neste contexto misto.`;
-    } else {
-      summaryEN = `Several indicators signal overbought conditions or elevated risk with BTC at ${priceStr}. Caution recommended — wait for a pullback or continue moderate DCA.`;
-      summaryES = `Varios indicadores señalan sobrecompra o riesgo elevado con BTC a ${priceStr}. Se recomienda cautela — espera un pullback o continúa DCA moderado.`;
-      summaryPT = `Vários indicadores sinalizam sobrecompra ou risco elevado com BTC a ${priceStr}. Cautela recomendada — aguarda pullback ou continua DCA moderado.`;
-    }
-
     const result = {
       score: displayScore,
       rawScore: totalScore,
       verdict,
       summary,
-      summaryEN,
-      summaryES,
-      summaryPT,
       indicators,
       btcPrice
     };
