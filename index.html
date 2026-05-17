@@ -1707,7 +1707,7 @@ const ALLOWED_CHAINS = new Set(['Solana','Ethereum','BSC','Arbitrum','Polygon','
 
 async function fetchPools() {
   try {
-    const res = await fetch('https://yields.llama.fi/pools', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
+    const res = await fetch('https://yields.llama.fi/pools');
     if (!res.ok) throw new Error('API error');
     const json = await res.json();
     const TRUSTED_PROTOCOLS = new Set([
@@ -2329,10 +2329,10 @@ function btcWidgetInit() {
 
 async function runBtcAnalysisSilent() {
   try {
-    const fgRes = await fetch('https://api.alternative.me/fng/?limit=1&format=json', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
+    const fgRes = await fetch('https://api.alternative.me/fng/?limit=1&format=json');
     const fgData = await fgRes.json();
     const fgValue = parseInt(fgData.data[0].value);
-    const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
+    const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
     const cgData = await cgRes.json();
     const btcPrice = cgData.bitcoin.usd;
     const change24h = cgData.bitcoin.usd_24h_change;
@@ -2462,7 +2462,7 @@ async function runBtcAnalysis() {
     let fgValue = null;
     let fgLabel = 'Desconhecido';
     try {
-      const fgRes = await fetch('https://api.alternative.me/fng/?limit=1&format=json', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
+      const fgRes = await fetch('https://api.alternative.me/fng/?limit=1&format=json');
       const fgData = await fgRes.json();
       fgValue = parseInt(fgData.data[0].value);
       fgLabel = fgData.data[0].value_classification;
@@ -2472,10 +2472,14 @@ async function runBtcAnalysis() {
     let fgStatus = '';
     let fgStatusEN = '';
     let fgStatusES = '';
+    let fgStatusEN = '';
+    let fgStatusES = '';
     if (fgValue !== null) {
       if (fgValue <= 45) {
         fgPoints = 1;
         fgStatus = `Medo — ${fgValue}/100 · Oportunidade histórica`;
+        fgStatusEN = `Fear — ${fgValue}/100 · Historical opportunity`;
+        fgStatusES = `Miedo — ${fgValue}/100 · Oportunidad histórica`;
         fgStatusEN = `Fear — ${fgValue}/100 · Historical opportunity`;
         fgStatusES = `Miedo — ${fgValue}/100 · Oportunidad histórica`;
       } else if (fgValue >= 75) {
@@ -2483,9 +2487,13 @@ async function runBtcAnalysis() {
         fgStatus = `Ganância Extrema — ${fgValue}/100 · Mercado sobrecomprado`;
         fgStatusEN = `Extreme Greed — ${fgValue}/100 · Market overbought`;
         fgStatusES = `Codicia Extrema — ${fgValue}/100 · Mercado sobrecomprado`;
+        fgStatusEN = `Extreme Greed — ${fgValue}/100 · Market overbought`;
+        fgStatusES = `Codicia Extrema — ${fgValue}/100 · Mercado sobrecomprado`;
       } else {
         fgPoints = 0;
         fgStatus = `Neutro — ${fgValue}/100 · ${fgLabel}`;
+        fgStatusEN = `Neutral — ${fgValue}/100 · ${fgLabel}`;
+        fgStatusES = `Neutro — ${fgValue}/100 · ${fgLabel}`;
         fgStatusEN = `Neutral — ${fgValue}/100 · ${fgLabel}`;
         fgStatusES = `Neutro — ${fgValue}/100 · ${fgLabel}`;
       }
@@ -2503,7 +2511,7 @@ async function runBtcAnalysis() {
     let btcChange24h = 0;
     let btcChange7d = 0;
     try {
-      const cgRes = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
+      const cgRes = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false');
       const cgData = await cgRes.json();
       btcPrice = cgData.market_data.current_price.usd;
       btcChange24h = cgData.market_data.price_change_percentage_24h;
@@ -2572,7 +2580,7 @@ async function runBtcAnalysis() {
     // +1 if BTC price >10% above mining cost (miners clearly profitable)
     // 0  if within 10% either way (breakeven zone)
     // -1 if mining cost >10% above BTC price (miners losing)
-    const MINING_COST = 82700;
+    const MINING_COST = 82700; // MacroMicro total production cost Mai 2026
     let miningPoints = 0;
     let miningStatus = '';
     let miningStatusEN = '';
@@ -2581,19 +2589,19 @@ async function runBtcAnalysis() {
       const diff = ((btcPrice - MINING_COST) / MINING_COST) * 100;
       if (diff > 10) {
         miningPoints = 1;
-        miningStatus   = `Preço BTC acima custo mineração · Mineiros rentáveis`;
-        miningStatusEN = `BTC price above mining cost · Miners profitable`;
-        miningStatusES = `Precio BTC sobre costo minería · Mineros rentables`;
+        miningStatus   = 'Preço BTC acima custo mineração · Mineiros rentáveis';
+        miningStatusEN = 'BTC price above mining cost · Miners profitable';
+        miningStatusES = 'Precio BTC sobre costo minería · Mineros rentables';
       } else if (diff < -10) {
         miningPoints = -1;
-        miningStatus   = `Custo mineração acima preço BTC · Mineiros em perda`;
-        miningStatusEN = `Mining cost above BTC price · Miners losing money`;
-        miningStatusES = `Costo minería sobre precio BTC · Mineros en pérdida`;
+        miningStatus   = 'Custo mineração acima preço BTC · Mineiros em perda';
+        miningStatusEN = 'Mining cost above BTC price · Miners losing money';
+        miningStatusES = 'Costo minería sobre precio BTC · Mineros en pérdida';
       } else {
         miningPoints = 0;
-        miningStatus   = `Custo mineração próximo do preço BTC · Zona de equilíbrio`;
-        miningStatusEN = `Mining cost near BTC price · Breakeven zone`;
-        miningStatusES = `Costo minería cerca del precio BTC · Zona de equilibrio`;
+        miningStatus   = 'Custo mineração próximo do preço BTC · Zona de equilíbrio';
+        miningStatusEN = 'Mining cost near BTC price · Breakeven zone';
+        miningStatusES = 'Costo minería cerca del precio BTC · Zona de equilibrio';
       }
     } else {
       miningStatus   = 'Sem dados de preço';
@@ -2614,7 +2622,7 @@ async function runBtcAnalysis() {
     let etfStatusEN = '';
     let etfStatusES = '';
     try {
-      const cgVol = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
+      const cgVol = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily');
       const cgVolData = await cgVol.json();
       const volumes = cgVolData.total_volumes || [];
       if (volumes.length >= 2) {
@@ -2651,7 +2659,7 @@ async function runBtcAnalysis() {
     let peakStatusEN = '';
     let peakStatusES = '';
     try {
-      const domRes = await fetch('https://api.coingecko.com/api/v3/global', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
+      const domRes = await fetch('https://api.coingecko.com/api/v3/global');
       const domData = await domRes.json();
       const btcDom = domData.data.market_cap_percentage.btc;
       // BTC dominância alta = altseason não começou = bull market saudável para BTC
