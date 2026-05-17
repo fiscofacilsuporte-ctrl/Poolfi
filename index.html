@@ -2381,23 +2381,31 @@ async function runBtcAnalysis() {
 
     let fgPoints = 0;
     let fgStatus = '';
+    let fgStatusEN = '';
+    let fgStatusES = '';
     if (fgValue !== null) {
       if (fgValue <= 45) {
         fgPoints = 1;
         fgStatus = `Medo — ${fgValue}/100 · Oportunidade histórica`;
+        fgStatusEN = `Fear — ${fgValue}/100 · Historical opportunity`;
+        fgStatusES = `Miedo — ${fgValue}/100 · Oportunidad histórica`;
       } else if (fgValue >= 75) {
         fgPoints = -1;
         fgStatus = `Ganância Extrema — ${fgValue}/100 · Mercado sobrecomprado`;
+        fgStatusEN = `Extreme Greed — ${fgValue}/100 · Market overbought`;
+        fgStatusES = `Codicia Extrema — ${fgValue}/100 · Mercado sobrecomprado`;
       } else {
         fgPoints = 0;
         fgStatus = `Neutro — ${fgValue}/100 · ${fgLabel}`;
+        fgStatusEN = `Neutral — ${fgValue}/100 · ${fgLabel}`;
+        fgStatusES = `Neutro — ${fgValue}/100 · ${fgLabel}`;
       }
     } else {
       fgStatus = 'Sem dados disponíveis';
     }
     indicators.push({ 
       name: 'Fear & Greed Index', nameEN: 'Fear & Greed Index', nameES: 'Índice Miedo & Codicia',
-      status: fgStatus, statusEN: fgStatus, statusES: fgStatus, points: fgPoints 
+      status: fgStatus, statusEN: fgStatusEN, statusES: fgStatusES, points: fgPoints 
     });
     totalScore += fgPoints;
 
@@ -2425,11 +2433,12 @@ async function runBtcAnalysis() {
       } else {
         piPoints = 1;
         piStatus = `${athDropPct.toFixed(0)}% abaixo do ATH · Sem sinais de topo`;
+        piStatusEN = `${athDropPct.toFixed(0)}% below ATH · No top signals`;
+        piStatusES = `${athDropPct.toFixed(0)}% bajo el ATH · Sin señales de techo`;
       }
       indicators.push({ 
         name: 'Pi Cycle / Distância ATH', nameEN: 'Pi Cycle / ATH Distance', nameES: 'Pi Cycle / Distancia ATH',
-        status: piStatus, statusEN: piStatus.replace('abaixo do ATH','below ATH').replace('Sem sinais de topo','No top signals').replace('Próximo do ATH','Near ATH'),
-        statusES: piStatus.replace('abaixo do ATH','bajo el ATH').replace('Sem sinais de topo','Sin señales de techo').replace('Próximo do ATH','Cerca del ATH'),
+        status: piStatus, statusEN: piStatusEN || piStatus, statusES: piStatusES || piStatus,
         points: piPoints 
       });
       totalScore += piPoints;
@@ -2458,9 +2467,7 @@ async function runBtcAnalysis() {
     }
     indicators.push({ 
       name: 'MVRV Z-Score (proxy)', nameEN: 'MVRV Z-Score (proxy)', nameES: 'MVRV Z-Score (proxy)',
-      status: mvrvStatus, 
-      statusEN: mvrvStatus.replace('esta semana','this week').replace('neutro','neutral').replace('sobrevalorizado','overvalued').replace('subvalorizado','undervalued'),
-      statusES: mvrvStatus.replace('esta semana','esta semana').replace('neutro','neutro').replace('sobrevalorizado','sobrevaluado').replace('subvalorizado','subvaluado'),
+      status: mvrvStatus, statusEN: mvrvStatusEN || mvrvStatus, statusES: mvrvStatusES || mvrvStatus,
       points: mvrvPoints 
     });
     totalScore += mvrvPoints;
@@ -2519,6 +2526,8 @@ async function runBtcAnalysis() {
     // Usamos a variação 24h como proxy de pressão institucional
     let etfPoints = 0;
     let etfStatus = '';
+    let etfStatusEN = '';
+    let etfStatusES = '';
     try {
       const cgVol = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily');
       const cgVolData = await cgVol.json();
@@ -2537,6 +2546,8 @@ async function runBtcAnalysis() {
         } else {
           etfPoints = 0;
           etfStatus = `Fluxo misto · Dados Farside pendentes`;
+        etfStatusEN = `Mixed flow · Farside data pending`;
+        etfStatusES = `Flujo mixto · Datos Farside pendientes`;
         }
       }
     } catch(e) {
@@ -2544,9 +2555,7 @@ async function runBtcAnalysis() {
     }
     indicators.push({ 
       name: 'Flows ETF Institucionais', nameEN: 'Institutional ETF Flows', nameES: 'Flujos ETF Institucionales',
-      status: etfStatus,
-      statusEN: etfStatus.replace('Fluxo positivo','Positive flow').replace('Fluxo negativo','Negative flow').replace('Fluxo misto','Mixed flow').replace('Dados Farside pendentes','Farside data pending').replace('acumulação institucional','institutional accumulation').replace('distribuição','distribution'),
-      statusES: etfStatus.replace('Fluxo positivo','Flujo positivo').replace('Fluxo negativo','Flujo negativo').replace('Fluxo misto','Flujo mixto').replace('Dados Farside pendentes','Datos Farside pendientes').replace('acumulação institucional','acumulación institucional').replace('distribuição','distribución'),
+      status: etfStatus, statusEN: etfStatusEN || etfStatus, statusES: etfStatusES || etfStatus,
       points: etfPoints 
     });
     totalScore += etfPoints;
@@ -2554,6 +2563,8 @@ async function runBtcAnalysis() {
     // ── 6. Bull Market Signals (CoinGlass proxy via dominância + RSI estimado) ──
     let peakPoints = 0;
     let peakStatus = '';
+    let peakStatusEN = '';
+    let peakStatusES = '';
     try {
       const domRes = await fetch('https://api.coingecko.com/api/v3/global');
       const domData = await domRes.json();
@@ -2574,9 +2585,7 @@ async function runBtcAnalysis() {
     }
     indicators.push({ 
       name: 'Bull Market Peak Signals', nameEN: 'Bull Market Peak Signals', nameES: 'Señales de Techo Bull Market',
-      status: peakStatus,
-      statusEN: peakStatus.replace('Dominância BTC','BTC Dominance').replace('Sinais de topo distantes','Top signals distant').replace('Atenção','Caution').replace('Alta dominância BTC','High BTC dominance'),
-      statusES: peakStatus.replace('Dominância BTC','Dominancia BTC').replace('Sinais de topo distantes','Señales de techo distantes').replace('Atenção','Atención').replace('Alta dominância BTC','Alta dominancia BTC'),
+      status: peakStatus, statusEN: peakStatusEN || peakStatus, statusES: peakStatusES || peakStatus,
       points: peakPoints 
     });
     totalScore += peakPoints;
