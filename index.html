@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0e1a" />
 <meta name="description" content="PoolFi — Acompanha APYs de pools DeFi em tempo real. Solana, Ethereum, BNB Chain, Arbitrum e mais." />
+<meta property="og:title" content="PoolFi — DeFi APY Tracker"/>
+<meta property="og:description" content="Real-time APY from audited DeFi pools. Solana, Ethereum, Arbitrum and more. No wallet needed."/>
+<meta property="og:url" content="https://poolfi.xyz"/>
+<meta property="og:type" content="website"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:site" content="@poolfi_xyz"/>
+<meta name="twitter:title" content="PoolFi — DeFi APY Tracker"/>
+<meta name="twitter:description" content="Real-time APY from audited DeFi pools. No wallet needed."/>
 <title>PoolFi — DeFi APY Tracker</title>
 <link rel="manifest" href="#" />
 <!-- Umami Analytics — privacy-first, sem cookies, GDPR compliant -->
@@ -1113,6 +1121,10 @@
       <div class="contact-icon">✉️</div>
       <span id="contact-label">Poolfi.support@proton.me</span>
     </a>
+    <a href="https://x.com/poolfi_xyz" target="_blank" rel="noopener" class="contact-btn" style="margin-top:-4px">
+      <div class="contact-icon" style="background:linear-gradient(135deg,#000,#333)">𝕏</div>
+      <span>@poolfi_xyz · Follow us on X</span>
+    </a>
     <p class="footer-legal" id="footer-legal">
       © 2026 PoolFi · Apenas para fins educacionais · Não é aconselhamento financeiro<br>
       Dados via <a href="https://defillama.com" target="_blank">DeFiLlama</a> · 
@@ -1695,7 +1707,7 @@ const ALLOWED_CHAINS = new Set(['Solana','Ethereum','BSC','Arbitrum','Polygon','
 
 async function fetchPools() {
   try {
-    const res = await fetch('https://yields.llama.fi/pools');
+    const res = await fetch('https://yields.llama.fi/pools', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
     if (!res.ok) throw new Error('API error');
     const json = await res.json();
     const TRUSTED_PROTOCOLS = new Set([
@@ -2317,10 +2329,10 @@ function btcWidgetInit() {
 
 async function runBtcAnalysisSilent() {
   try {
-    const fgRes = await fetch('https://api.alternative.me/fng/?limit=1&format=json');
+    const fgRes = await fetch('https://api.alternative.me/fng/?limit=1&format=json', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
     const fgData = await fgRes.json();
     const fgValue = parseInt(fgData.data[0].value);
-    const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+    const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
     const cgData = await cgRes.json();
     const btcPrice = cgData.bitcoin.usd;
     const change24h = cgData.bitcoin.usd_24h_change;
@@ -2450,7 +2462,7 @@ async function runBtcAnalysis() {
     let fgValue = null;
     let fgLabel = 'Desconhecido';
     try {
-      const fgRes = await fetch('https://api.alternative.me/fng/?limit=1&format=json');
+      const fgRes = await fetch('https://api.alternative.me/fng/?limit=1&format=json', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
       const fgData = await fgRes.json();
       fgValue = parseInt(fgData.data[0].value);
       fgLabel = fgData.data[0].value_classification;
@@ -2491,7 +2503,7 @@ async function runBtcAnalysis() {
     let btcChange24h = 0;
     let btcChange7d = 0;
     try {
-      const cgRes = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false');
+      const cgRes = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
       const cgData = await cgRes.json();
       btcPrice = cgData.market_data.current_price.usd;
       btcChange24h = cgData.market_data.price_change_percentage_24h;
@@ -2602,7 +2614,7 @@ async function runBtcAnalysis() {
     let etfStatusEN = '';
     let etfStatusES = '';
     try {
-      const cgVol = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily');
+      const cgVol = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
       const cgVolData = await cgVol.json();
       const volumes = cgVolData.total_volumes || [];
       if (volumes.length >= 2) {
@@ -2639,7 +2651,7 @@ async function runBtcAnalysis() {
     let peakStatusEN = '';
     let peakStatusES = '';
     try {
-      const domRes = await fetch('https://api.coingecko.com/api/v3/global');
+      const domRes = await fetch('https://api.coingecko.com/api/v3/global', {cache: 'no-store', headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}});
       const domData = await domRes.json();
       const btcDom = domData.data.market_cap_percentage.btc;
       // BTC dominância alta = altseason não começou = bull market saudável para BTC
