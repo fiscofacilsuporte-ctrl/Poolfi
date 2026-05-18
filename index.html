@@ -4,7 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0e1a" />
-<meta name="description" content="PoolFi — Acompanha APYs de pools DeFi em tempo real. Solana, Ethereum, BNB Chain, Arbitrum e mais." />
+<meta name="description" content="PoolFi — Real-time DeFi APY tracker. Find the best audited liquidity pools across Solana, Ethereum, Arbitrum, BNB Chain and more. No wallet needed. Free." />
+<meta property="og:title" content="PoolFi — DeFi APY Tracker"/>
+<meta property="og:description" content="Real-time APY from audited DeFi pools. Solana, Ethereum, Arbitrum and more. No wallet needed."/>
+<meta property="og:url" content="https://poolfi.xyz"/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="https://poolfi.xyz/og-image.png"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:site" content="@poolfi_xyz"/>
+<meta name="twitter:title" content="PoolFi — DeFi APY Tracker"/>
+<meta name="twitter:description" content="Real-time APY from audited DeFi pools. No wallet needed."/>
 <title>PoolFi — DeFi APY Tracker</title>
 <link rel="manifest" href="#" />
 <!-- Umami Analytics — privacy-first, sem cookies, GDPR compliant -->
@@ -861,6 +870,32 @@
     padding: 0 4px;
   }
 </style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "PoolFi",
+  "url": "https://poolfi.xyz",
+  "description": "Real-time DeFi APY tracker. Find the best audited liquidity pools across Solana, Ethereum, Arbitrum, BNB Chain and more.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Real-time APY tracking",
+    "Audited protocols only",
+    "Multi-chain: Solana, Ethereum, Arbitrum, BNB Chain, Polygon, Base, Avalanche",
+    "IL risk calculator",
+    "Historical Pool vs HODLing calculator",
+    "Bitcoin market timing indicator"
+  ]
+}
+</script>
+<link rel="canonical" href="https://poolfi.xyz"/>
 </head>
 <body>
 <div class="app">
@@ -2536,15 +2571,21 @@ async function runBtcAnalysis() {
       // ATH drop heurístico: se >50% abaixo do ATH = zona de acumulação (Pi Cycle proxy)
       let piPoints = 0;
       let piStatus = '';
+      let piStatusEN = '';
+      let piStatusES = '';
       if (athDropPct > 50) {
         piPoints = 1;
-        piStatus = `${athDropPct.toFixed(0)}% abaixo do ATH · Zona de acumulação`;
+        piStatus   = `${athDropPct.toFixed(0)}% abaixo do ATH · Zona de acumulação`;
+        piStatusEN = `${athDropPct.toFixed(0)}% below ATH · Accumulation zone`;
+        piStatusES = `${athDropPct.toFixed(0)}% bajo el ATH · Zona de acumulación`;
       } else if (athDropPct < 10) {
         piPoints = 0;
-        piStatus = `Próximo do ATH (${athDropPct.toFixed(0)}% abaixo) · Topo possível`;
+        piStatus   = `Próximo do ATH (${athDropPct.toFixed(0)}% abaixo) · Topo possível`;
+        piStatusEN = `Near ATH (${athDropPct.toFixed(0)}% below) · Possible top`;
+        piStatusES = `Cerca del ATH (${athDropPct.toFixed(0)}% abajo) · Posible techo`;
       } else {
         piPoints = 1;
-        piStatus = `${athDropPct.toFixed(0)}% abaixo do ATH · Sem sinais de topo`;
+        piStatus   = `${athDropPct.toFixed(0)}% abaixo do ATH · Sem sinais de topo`;
         piStatusEN = `${athDropPct.toFixed(0)}% below ATH · No top signals`;
         piStatusES = `${athDropPct.toFixed(0)}% bajo el ATH · Sin señales de techo`;
       }
@@ -2563,23 +2604,33 @@ async function runBtcAnalysis() {
     // Preço muito acima da média (>30% em 7d) = sobrevalorizado; queda = subvalorizado
     let mvrvPoints = 0;
     let mvrvStatus = '';
+    let mvrvStatusEN = '';
+    let mvrvStatusES = '';
     if (btcPrice !== null) {
       if (btcChange7d > 25) {
         mvrvPoints = -1;
-        mvrvStatus = `+${btcChange7d.toFixed(1)}% esta semana · Possível sobrevalorização`;
+        mvrvStatus   = `+${btcChange7d.toFixed(1)}% esta semana · Possível sobrevalorização`;
+        mvrvStatusEN = `+${btcChange7d.toFixed(1)}% this week · Possible overvaluation`;
+        mvrvStatusES = `+${btcChange7d.toFixed(1)}% esta semana · Posible sobrevaluación`;
       } else if (btcChange7d < -15) {
         mvrvPoints = 1;
-        mvrvStatus = `${btcChange7d.toFixed(1)}% esta semana · Zona de valor on-chain`;
+        mvrvStatus   = `${btcChange7d.toFixed(1)}% esta semana · Zona de valor on-chain`;
+        mvrvStatusEN = `${btcChange7d.toFixed(1)}% this week · On-chain value zone`;
+        mvrvStatusES = `${btcChange7d.toFixed(1)}% esta semana · Zona de valor on-chain`;
       } else {
         mvrvPoints = 0;
-        mvrvStatus = `${btcChange7d > 0 ? '+' : ''}${btcChange7d.toFixed(1)}% esta semana · MVRV neutro`;
+        mvrvStatus   = `${btcChange7d > 0 ? '+' : ''}${btcChange7d.toFixed(1)}% esta semana · MVRV neutro`;
+        mvrvStatusEN = `${btcChange7d > 0 ? '+' : ''}${btcChange7d.toFixed(1)}% this week · MVRV neutral`;
+        mvrvStatusES = `${btcChange7d > 0 ? '+' : ''}${btcChange7d.toFixed(1)}% esta semana · MVRV neutro`;
       }
     } else {
-      mvrvStatus = 'Sem dados disponíveis';
+      mvrvStatus   = 'Sem dados disponíveis';
+      mvrvStatusEN = 'No data available';
+      mvrvStatusES = 'Sin datos disponibles';
     }
     indicators.push({ 
       name: 'MVRV Z-Score (proxy)', nameEN: 'MVRV Z-Score (proxy)', nameES: 'MVRV Z-Score (proxy)',
-      status: mvrvStatus, statusEN: mvrvStatusEN || mvrvStatus, statusES: mvrvStatusES || mvrvStatus,
+      status: mvrvStatus, statusEN: mvrvStatusEN, statusES: mvrvStatusES,
       points: mvrvPoints 
     });
     totalScore += mvrvPoints;
@@ -2591,37 +2642,37 @@ async function runBtcAnalysis() {
     // Lógica: quando BTC < custo mineração = sinal de compra forte (miners capitulam)
     //         quando BTC 0-15% acima custo = neutro/favorável
     //         quando BTC > 15% acima custo = sobreextendido
-    const MINING_COST = 82702.96; // MacroMicro · 2026-05-08 · USD
-    const MINING_DATE = '08 Mai 2026';
-    const MINING_DATE_EN = 'May 8, 2026';
-    const MINING_DATE_ES = '8 May 2026';
+    // Mining cost: MacroMicro total production cost $82,703 (May 2026)
+    // Rule: BTC must be >10% above mining cost for +1 (miners clearly profitable)
+    //       within 10%  = 0 neutral (breakeven zone — currently here)
+    //       cost >10% above BTC = -1 (miners losing)
+    const MINING_COST = 82703;
     let miningPoints = 0;
     let miningStatus = '';
     let miningStatusEN = '';
     let miningStatusES = '';
     if (btcPrice !== null) {
-      const miningMargin = ((btcPrice - MINING_COST) / MINING_COST) * 100;
-      const priceK = `$${Math.round(MINING_COST/1000)}k`;
-      if (miningMargin < -5) {
+      const diff = ((btcPrice - MINING_COST) / MINING_COST) * 100;
+      if (diff > 10) {
         miningPoints = 1;
-        miningStatus = `BTC abaixo do custo de mineração · Sinal de acumulação forte`;
-        miningStatusEN = `BTC below mining cost · Strong accumulation signal`;
-        miningStatusES = `BTC por debajo del costo de minería · Señal de acumulación fuerte`;
-      } else if (miningMargin >= -5 && miningMargin < 15) {
-        miningPoints = 1;
-        miningStatus = `BTC próximo do custo de mineração · Zona favorável`;
-        miningStatusEN = `BTC near mining cost · Favourable zone`;
-        miningStatusES = `BTC cerca del costo de minería · Zona favorable`;
+        miningStatus   = 'Preço BTC acima do custo de mineração · Mineiros rentáveis';
+        miningStatusEN = 'BTC price above mining cost · Miners profitable';
+        miningStatusES = 'Precio BTC sobre costo minería · Mineros rentables';
+      } else if (diff >= -10) {
+        miningPoints = 0;
+        miningStatus   = 'Custo de mineração próximo do preço BTC · Zona de equilíbrio';
+        miningStatusEN = 'Mining cost near BTC price · Breakeven zone';
+        miningStatusES = 'Costo minería cerca del precio BTC · Zona de equilibrio';
       } else {
         miningPoints = -1;
-        miningStatus = `BTC bem acima do custo de mineração · Sobreextendido`;
-        miningStatusEN = `BTC well above mining cost · Over-extended`;
-        miningStatusES = `BTC muy por encima del costo de minería · Sobreextendido`;
+        miningStatus   = 'Custo de mineração acima do preço BTC · Mineiros em perda';
+        miningStatusEN = 'Mining cost above BTC price · Miners losing money';
+        miningStatusES = 'Costo minería sobre precio BTC · Mineros en pérdida';
       }
     } else {
-      miningStatus = 'Sem dados de preço (CoinGecko)';
-      miningStatusEN = 'No price data (CoinGecko)';
-      miningStatusES = 'Sin datos de precio (CoinGecko)';
+      miningStatus   = 'Sem dados de preço';
+      miningStatusEN = 'No price data';
+      miningStatusES = 'Sin datos de precio';
     }
     indicators.push({ 
       name: 'Custo de Mineração vs Preço', 
