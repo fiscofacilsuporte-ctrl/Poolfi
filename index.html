@@ -2448,18 +2448,26 @@ const BTC_CACHE_KEY = 'btc_timing_cache';
 
 function getBtcCachedResult() {
   try {
-    const raw = localStorage.getItem(BTC_CACHE_KEY);
+    // sessionStorage é limpo automaticamente quando o browser fecha ou a tab é recarregada
+    const raw = sessionStorage.getItem(BTC_CACHE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    const today = new Date().toDateString();
-    if (parsed.date === today) return parsed;
+    // Validade extra: máximo 30 minutos dentro da mesma sessão
+    const age = Date.now() - (parsed.timestamp || 0);
+    if (age < 30 * 60 * 1000) return parsed;
   } catch(e) {}
   return null;
 }
 
 function setBtcCache(data) {
-  data.date = new Date().toDateString();
-  localStorage.setItem(BTC_CACHE_KEY, JSON.stringify(data));
+  data.timestamp = Date.now();
+  try {
+    sessionStorage.setItem(BTC_CACHE_KEY, JSON.stringify(data));
+  } catch(e) {}
+  // Também guarda no localStorage para o widget do anel (apenas visual, sem expiração rígida)
+  try {
+    localStorage.setItem(BTC_CACHE_KEY, JSON.stringify(data));
+  } catch(e) {}
 }
 
 function openBtcTiming() {
@@ -2474,13 +2482,14 @@ function openBtcTiming() {
   }
 }
 
-// On page load, silently fetch to populate the ring (no modal)
+// No carregamento da página, vai buscar dados frescos para o anel
+// Usa sessão cache apenas se existir (mesma sessão, < 30 min)
 function btcWidgetInit() {
   const cached = getBtcCachedResult();
   if (cached) {
     updateBtcWidget(cached);
   } else {
-    // Fetch silently just to populate the ring indicator
+    // Sem cache de sessão → vai buscar dados frescos silenciosamente
     runBtcAnalysisSilent();
   }
 }
