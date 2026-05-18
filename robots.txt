@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://poolfi.xyz/sitemap.xml
-
-# Disallow admin/API paths if they exist
-Disallow: /api/
