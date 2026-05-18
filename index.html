@@ -1,20 +1,52 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0e1a" />
-<meta name="description" content="PoolFi — Real-time DeFi APY tracker. Find the best audited liquidity pools across Solana, Ethereum, Arbitrum, BNB Chain and more. No wallet needed. Free." />
-<meta property="og:title" content="PoolFi — DeFi APY Tracker"/>
-<meta property="og:description" content="Real-time APY from audited DeFi pools. Solana, Ethereum, Arbitrum and more. No wallet needed."/>
+
+<!-- ── Primary SEO ── -->
+<title>PoolFi — Comparador de Pools DeFi | Melhores APY em Tempo Real</title>
+<meta name="description" content="PoolFi: encontra as melhores pools de liquidez DeFi com APY em tempo real. Compara Uniswap, Raydium, Aave, Aerodrome e +30 protocolos auditados em Solana, Ethereum, Arbitrum, BNB Chain. Calculadora IL incluída. Grátis, sem wallet necessária." />
+<meta name="keywords" content="DeFi pools, APY tempo real, liquidez DeFi, yield farming, Uniswap, Raydium, Aave, Solana pools, Ethereum pools, impermanent loss calculator, DeFi APY tracker, melhores pools liquidez, PoolFi" />
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+<meta name="author" content="PoolFi" />
+<link rel="canonical" href="https://poolfi.xyz" />
+
+<!-- ── Hreflang ── -->
+<link rel="alternate" hreflang="pt" href="https://poolfi.xyz/?lang=pt" />
+<link rel="alternate" hreflang="en" href="https://poolfi.xyz/?lang=en" />
+<link rel="alternate" hreflang="es" href="https://poolfi.xyz/?lang=es" />
+<link rel="alternate" hreflang="x-default" href="https://poolfi.xyz" />
+
+<!-- ── Open Graph ── -->
+<meta property="og:title" content="PoolFi — Melhores Pools DeFi | APY em Tempo Real"/>
+<meta property="og:description" content="Compara APY de +30 protocolos DeFi auditados: Uniswap, Raydium, Aave e mais. Solana, Ethereum, Arbitrum, BNB Chain. Calculadora de rendimentos incluída. Grátis."/>
 <meta property="og:url" content="https://poolfi.xyz"/>
 <meta property="og:type" content="website"/>
 <meta property="og:image" content="https://poolfi.xyz/og-image.png"/>
-<meta name="twitter:card" content="summary"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="PoolFi — DeFi APY Tracker"/>
+<meta property="og:site_name" content="PoolFi"/>
+<meta property="og:locale" content="pt_PT"/>
+
+<!-- ── Twitter / X Card ── -->
+<meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:site" content="@poolfi_xyz"/>
-<meta name="twitter:title" content="PoolFi — DeFi APY Tracker"/>
-<meta name="twitter:description" content="Real-time APY from audited DeFi pools. No wallet needed."/>
-<title>PoolFi — DeFi APY Tracker</title>
+<meta name="twitter:creator" content="@poolfi_xyz"/>
+<meta name="twitter:title" content="PoolFi — Melhores Pools DeFi | APY Tempo Real"/>
+<meta name="twitter:description" content="Compara APY de +30 protocolos DeFi auditados. Solana, Ethereum, Arbitrum. Sem wallet necessária."/>
+<meta name="twitter:image" content="https://poolfi.xyz/og-image.png"/>
+
+<!-- ── Performance: Preconnect critical origins ── -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://yields.llama.fi" />
+<link rel="preconnect" href="https://api.coingecko.com" />
+<link rel="preconnect" href="https://api.alternative.me" />
+<link rel="dns-prefetch" href="https://cloud.umami.is" />
+
 <link rel="manifest" href="#" />
 <!-- Umami Analytics — privacy-first, sem cookies, GDPR compliant -->
 <script defer src="https://cloud.umami.is/script.js" data-website-id="88cc101a-92bc-4369-a824-b76202e119d2"></script>
@@ -874,24 +906,87 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "PoolFi",
-  "url": "https://poolfi.xyz",
-  "description": "Real-time DeFi APY tracker. Find the best audited liquidity pools across Solana, Ethereum, Arbitrum, BNB Chain and more.",
-  "applicationCategory": "FinanceApplication",
-  "operatingSystem": "Web",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "featureList": [
-    "Real-time APY tracking",
-    "Audited protocols only",
-    "Multi-chain: Solana, Ethereum, Arbitrum, BNB Chain, Polygon, Base, Avalanche",
-    "IL risk calculator",
-    "Historical Pool vs HODLing calculator",
-    "Bitcoin market timing indicator"
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://poolfi.xyz/#webapp",
+      "name": "PoolFi",
+      "url": "https://poolfi.xyz",
+      "description": "PoolFi é um comparador de pools DeFi em tempo real. Encontra as melhores pools de liquidez com APY atualizado ao minuto em Solana, Ethereum, Arbitrum, BNB Chain, Polygon, Base e Avalanche.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "inLanguage": ["pt", "en", "es"],
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Comparação APY em tempo real",
+        "Apenas protocolos auditados",
+        "Multi-chain: Solana, Ethereum, Arbitrum, BNB Chain, Polygon, Base, Avalanche",
+        "Calculadora de Impermanent Loss",
+        "Calculadora Hold vs Pool com dados históricos reais",
+        "Indicador de Timing Bitcoin com 6 indicadores on-chain",
+        "Watchlist pessoal",
+        "Sem wallet necessária",
+        "Dados via DeFiLlama"
+      ],
+      "sameAs": ["https://x.com/poolfi_xyz"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://poolfi.xyz/#website",
+      "name": "PoolFi",
+      "url": "https://poolfi.xyz",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://poolfi.xyz/?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://poolfi.xyz/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "O que é o PoolFi?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PoolFi é uma aplicação gratuita que agrega e compara pools de liquidez DeFi de +30 protocolos auditados em tempo real, mostrando APY, TVL e volume 24h. Não é necessária wallet ou registo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quais blockchains são suportadas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PoolFi suporta Solana, Ethereum, Arbitrum, BNB Chain (BSC), Polygon, Base e Avalanche."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "O que é APY em DeFi?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "APY (Annual Percentage Yield) é o rendimento anual estimado ao fornecer liquidez numa pool DeFi, incluindo fees de trading e recompensas em token. Difere do APR por incluir juros compostos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "O que é Impermanent Loss?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Impermanent Loss (IL) é a perda temporária que ocorre quando o preço relativo dos ativos numa pool de liquidez muda em relação ao momento em que foram depositados. PoolFi inclui uma calculadora de IL integrada."
+          }
+        }
+      ]
+    }
   ]
 }
 </script>
@@ -900,7 +995,7 @@
 <body>
 <div class="app">
 
-  <header class="header">
+  <header class="header" role="banner" aria-label="PoolFi navigation">
     <div class="logo">
       <div class="logo-icon">⚡</div>
       <div class="logo-text">Pool<span>Fi</span></div>
@@ -924,7 +1019,8 @@
 
 
   <!-- Hero Section -->
-  <div class="hero-section">
+  <main>
+  <section class="hero-section" aria-label="Pesquisa de pools DeFi">
     <h1 class="hero-title" id="hero-title">Encontra as melhores<br><span class="hero-accent">pools de liquidez</span></h1>
     <p class="hero-subtitle" id="hero-sub">Dados de APY em tempo real dos protocolos DeFi mais confiáveis. Apenas projetos auditados.</p>
     <div class="data-sources">
@@ -1047,10 +1143,9 @@
       </a>
 
     </div>
-  </div>
+  </section>
 
-
-
+  <section aria-label="Lista de pools de liquidez">
   <div class="metrics" id="metrics">
     <div class="metric-card"><div class="metric-label">Pools</div><div class="metric-value" id="m-pools">—</div><div class="metric-sub">indexadas</div></div>
     <div class="metric-card"><div class="metric-label">APY médio</div><div class="metric-value" id="m-apy">—</div><div class="metric-sub">todas as redes</div></div>
@@ -1082,10 +1177,10 @@
     <div class="loading-bar"><div class="spinner"></div><span id="loading-text">Loading DeFiLlama data...</span></div>
   </div>
 
-  
+  </section>
 
   <!-- Calculator -->
-
+  <section aria-label="Calculadora de rendimentos DeFi">
 <!-- AADS AD UNIT 2437718 -->
 <div style="width:100%;max-height:80px;overflow:hidden;margin:10px auto;border-radius:8px;">
   <iframe data-aa='2437718' src='//acceptable.a-ads.com/2437718/?size=Adaptive'
@@ -1095,7 +1190,7 @@
   <div class="calc-section">
     <div class="calc-header">
       <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
-      <span id="calc-title-text">Yield Calculator</span>
+      <h2 style="font-size:14px;font-weight:500;margin:0" id="calc-title-text">Yield Calculator</h2>
       <div class="calc-tabs">
         <button class="calc-tab active" onclick="switchCalcTab('pool',this)" id="tab-pool-btn">💧 Pool APY</button>
         <button class="calc-tab" onclick="switchCalcTab('hold',this)" id="tab-hold-btn">📦 Hold vs Pool</button>
@@ -1167,29 +1262,33 @@
     </div>
   </div>
 
+  </section><!-- /calculator -->
+
   <div class="status-bar">
     <span id="pool-count">—</span>
     <span id="last-update">—</span>
   </div>
 
   <!-- Footer Contact -->
-  <div class="page-footer">
-    <a href="mailto:Poolfi.support@proton.me" class="contact-btn" id="contact-btn">
+  <footer class="page-footer" aria-label="Contacto e informação legal">
+    <a href="mailto:Poolfi.support@proton.me" class="contact-btn" id="contact-btn" aria-label="Enviar email para suporte PoolFi">
       <div class="contact-icon">✉️</div>
       <span id="contact-label">Poolfi.support@proton.me</span>
     </a>
-    <a href="https://x.com/poolfi_xyz" target="_blank" rel="noopener" class="contact-btn">
+    <a href="https://x.com/poolfi_xyz" target="_blank" rel="noopener" class="contact-btn" aria-label="Seguir PoolFi no X (Twitter)">
       <div class="contact-icon" style="background:linear-gradient(135deg,#000,#333);">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       </div>
       <span>@poolfi_xyz · Follow us on X</span>
     </a>
     <p class="footer-legal" id="footer-legal">
       © 2026 PoolFi · Apenas para fins educacionais · Não é aconselhamento financeiro<br>
-      Dados via <a href="https://defillama.com" target="_blank">DeFiLlama</a> · 
-      <a href="https://defillama.com" target="_blank">Metodologia</a>
+      Dados via <a href="https://defillama.com" target="_blank" rel="noopener">DeFiLlama</a> · 
+      <a href="https://defillama.com" target="_blank" rel="noopener">Metodologia</a>
     </p>
-  </div>
+  </footer>
+  </main>
+
 
 </div>
 
@@ -2647,6 +2746,9 @@ async function runBtcAnalysis() {
     //       within 10%  = 0 neutral (breakeven zone — currently here)
     //       cost >10% above BTC = -1 (miners losing)
     const MINING_COST = 82703;
+    const MINING_DATE    = 'mai 2026';
+    const MINING_DATE_EN = 'May 2026';
+    const MINING_DATE_ES = 'may 2026';
     let miningPoints = 0;
     let miningStatus = '';
     let miningStatusEN = '';
@@ -2738,19 +2840,25 @@ async function runBtcAnalysis() {
       // BTC dominância alta = altseason não começou = bull market saudável para BTC
       if (btcDom > 55) {
         peakPoints = 1;
-        peakStatus = `Dominância BTC ${btcDom.toFixed(1)}% · Sinais de topo distantes`;
+        peakStatus   = `Dominância BTC ${btcDom.toFixed(1)}% (Alta) · Altseason ainda não começou`;
+        peakStatusEN = `BTC Dominance ${btcDom.toFixed(1)}% (High) · Altseason not started yet`;
+        peakStatusES = `Dominancia BTC ${btcDom.toFixed(1)}% (Alta) · Altseason aún no comenzó`;
       } else if (btcDom < 45) {
         peakPoints = -1;
-        peakStatus = `Dominância BTC ${btcDom.toFixed(1)}% · Altseason avançada · Topo próximo`;
+        peakStatus   = `Dominância BTC ${btcDom.toFixed(1)}% (Baixa) · Altseason avançada · Topo próximo`;
+        peakStatusEN = `BTC Dominance ${btcDom.toFixed(1)}% (Low) · Altseason advanced · Top nearby`;
+        peakStatusES = `Dominancia BTC ${btcDom.toFixed(1)}% (Baja) · Altseason avanzada · Techo próximo`;
       } else {
         peakPoints = 0;
-        peakStatus = `Dominância BTC ${btcDom.toFixed(1)}% · Mercado equilibrado`;
+        peakStatus   = `Dominância BTC ${btcDom.toFixed(1)}% · Mercado equilibrado`;
+        peakStatusEN = `BTC Dominance ${btcDom.toFixed(1)}% · Balanced market`;
+        peakStatusES = `Dominancia BTC ${btcDom.toFixed(1)}% · Mercado equilibrado`;
       }
     } catch(e) {
       peakStatus = 'Sem dados de dominância';
     }
     indicators.push({ 
-      name: 'Bull Market Peak Signals', nameEN: 'Bull Market Peak Signals', nameES: 'Señales de Techo Bull Market',
+      name: 'Dominância BTC (Bull/Bear)', nameEN: 'BTC Dominance (Bull/Bear)', nameES: 'Dominancia BTC (Bull/Bear)',
       status: peakStatus, statusEN: peakStatusEN || peakStatus, statusES: peakStatusES || peakStatus,
       points: peakPoints 
     });
