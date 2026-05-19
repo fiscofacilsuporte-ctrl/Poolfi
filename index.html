@@ -390,6 +390,106 @@
     .pool-apy { font-size: 19px; }
   }
 
+  /* ── Language Picker ── */
+  .lang-picker-wrap { position: relative; }
+  .lang-picker-btn {
+    display: flex; align-items: center; gap: 4px;
+    padding: 4px 9px; border-radius: 6px;
+    border: 1px solid var(--border2); background: var(--bg3);
+    color: var(--text2); font-family: var(--font);
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .lang-picker-btn:hover { border-color: var(--green); color: var(--text); }
+  .lang-picker-dropdown {
+    display: none; position: absolute; top: calc(100% + 6px); right: 0;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); overflow: hidden;
+    z-index: 200; min-width: 52px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    animation: fadeIn 0.12s ease;
+  }
+  .lang-picker-dropdown.open { display: block; }
+  .lang-picker-opt {
+    display: block; width: 100%; padding: 7px 14px;
+    text-align: center; font-size: 11px; font-weight: 500;
+    background: transparent; border: none;
+    color: var(--text2); cursor: pointer; font-family: var(--font);
+    transition: background 0.1s, color 0.1s;
+  }
+  .lang-picker-opt:hover { background: var(--bg3); color: var(--text); }
+  .lang-picker-opt.active { color: var(--green); }
+  .wallet-wrap { position: relative; }
+  .wallet-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text2); font-family: var(--font);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .wallet-btn:hover { border-color: var(--purple); color: var(--text); }
+  .wallet-btn.connected {
+    border-color: rgba(0,229,160,0.35);
+    background: rgba(0,229,160,0.07);
+    color: var(--green);
+  }
+  .wallet-btn.connected:hover { border-color: var(--red); color: var(--red); background: rgba(255,77,106,0.07); }
+  .wallet-btn-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text3); flex-shrink: 0; transition: background 0.2s;
+  }
+  .wallet-btn.connected .wallet-btn-dot { background: var(--green); animation: pulse 2s infinite; }
+  .wallet-btn.connected:hover .wallet-btn-dot { background: var(--red); animation: none; }
+
+  .wallet-dropdown {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 6px;
+    min-width: 210px; z-index: 200;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: fadeIn 0.15s ease;
+  }
+  .wallet-dropdown.open { display: block; }
+  .wallet-dropdown-title {
+    font-size: 10px; color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 6px 10px 4px;
+  }
+  .wallet-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: background 0.12s;
+    font-size: 13px; color: var(--text);
+  }
+  .wallet-option:hover { background: var(--bg3); }
+  .wallet-option-icon {
+    width: 26px; height: 26px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .wallet-option-info { display: flex; flex-direction: column; }
+  .wallet-option-name { font-weight: 500; font-size: 13px; }
+  .wallet-option-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+  .wallet-option.unavailable { opacity: 0.4; cursor: not-allowed; }
+  .wallet-option.unavailable:hover { background: transparent; }
+  .wallet-divider { height: 1px; background: var(--border); margin: 4px 6px; }
+  .wallet-disconnect-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: background 0.12s;
+    font-size: 12px; color: var(--red);
+  }
+  .wallet-disconnect-row:hover { background: rgba(255,77,106,0.08); }
+  .wallet-connected-info {
+    padding: 8px 10px 4px; font-size: 11px; color: var(--text3);
+  }
+  .wallet-connected-addr {
+    font-family: var(--mono); font-size: 11px; color: var(--text2);
+    padding: 0 10px 6px;
+  }
+
   /* Donation button */
   .donate-btn {
     position: fixed; bottom: 20px; right: 16px;
@@ -1001,14 +1101,57 @@
       <div class="logo-text">Pool<span>Fi</span></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
+      <!-- Wallet Connect -->
+      <div class="wallet-wrap" id="wallet-wrap">
+        <button class="wallet-btn" id="wallet-btn" onclick="walletToggleDropdown()" aria-label="Connect wallet">
+          <span class="wallet-btn-dot"></span>
+          <span id="wallet-btn-label">Wallet</span>
+        </button>
+        <div class="wallet-dropdown" id="wallet-dropdown">
+          <div class="wallet-dropdown-title" id="wallet-dd-title">Connect Wallet (read-only)</div>
+          <!-- Connected state (hidden by default) -->
+          <div id="wallet-connected-block" style="display:none">
+            <div class="wallet-connected-info" id="wallet-connected-type">—</div>
+            <div class="wallet-connected-addr" id="wallet-connected-addr">—</div>
+            <div class="wallet-divider"></div>
+            <div class="wallet-disconnect-row" onclick="walletDisconnect()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span id="wallet-disconnect-label">Disconnect</span>
+            </div>
+          </div>
+          <!-- Options state -->
+          <div id="wallet-options-block">
+            <div class="wallet-option" id="opt-phantom" onclick="walletConnect('phantom')">
+              <div class="wallet-option-icon" style="background:linear-gradient(135deg,#9945FF,#14F195)">👻</div>
+              <div class="wallet-option-info">
+                <div class="wallet-option-name">Phantom</div>
+                <div class="wallet-option-sub" id="opt-phantom-sub">Solana · EVM</div>
+              </div>
+            </div>
+            <div class="wallet-option" id="opt-evm" onclick="walletConnect('evm')">
+              <div class="wallet-option-icon" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">🦊</div>
+              <div class="wallet-option-info">
+                <div class="wallet-option-name">MetaMask / Rabby</div>
+                <div class="wallet-option-sub" id="opt-evm-sub">EVM · Ethereum, Base...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <button class="theme-switch" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle light/dark mode">
         <span class="theme-icon" id="theme-icon">🌙</span>
         <div class="theme-track"><div class="theme-thumb"></div></div>
       </button>
-      <div style="display:flex;gap:4px">
-        <button class="lang-btn" data-lang="en" onclick="setLang('en')" style="font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.07);background:transparent;color:#8b9cc8;cursor:pointer;font-family:var(--font)">EN</button>
-        <button class="lang-btn" data-lang="pt" onclick="setLang('pt')" style="font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.07);background:transparent;color:#8b9cc8;cursor:pointer;font-family:var(--font)">PT</button>
-        <button class="lang-btn" data-lang="es" onclick="setLang('es')" style="font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.07);background:transparent;color:#8b9cc8;cursor:pointer;font-family:var(--font)">ES</button>
+      <div class="lang-picker-wrap" id="lang-picker-wrap">
+        <button class="lang-picker-btn" id="lang-picker-btn" onclick="langPickerToggle()">
+          <span id="lang-picker-label">EN</span>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="lang-picker-dropdown" id="lang-picker-dropdown">
+          <button class="lang-picker-opt" data-lang="en" onclick="setLang('en');langPickerClose()">EN</button>
+          <button class="lang-picker-opt" data-lang="pt" onclick="setLang('pt');langPickerClose()">PT</button>
+          <button class="lang-picker-opt" data-lang="es" onclick="setLang('es');langPickerClose()">ES</button>
+        </div>
       </div>
       <div class="live-badge">
       <div class="live-dot"></div>
@@ -1366,7 +1509,7 @@ let watchlist = new Set(JSON.parse(localStorage.getItem('ys_watchlist')||'[]'));
 let currentChain = 'all';
 let currentSort = 'tvl';
 let currentPage = 1;
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 10;
 let filteredTotal = [];
 let searchTerm = '';
 
@@ -2174,6 +2317,16 @@ const TRANSLATIONS = {
     btc_retry: '↺ Try again',
     btc_mining_label: 'Mining Cost vs Price',
     btc_mining_source: 'MacroMicro',
+    wallet_btn: 'Connect Wallet',
+    wallet_dd_title: 'Connect Wallet (read-only)',
+    wallet_phantom_sub: 'Solana · EVM',
+    wallet_evm_sub: 'EVM · Ethereum, Base...',
+    wallet_not_installed: 'Extension not installed',
+    wallet_connected_phantom: '👻 Phantom (Solana)',
+    wallet_connected_evm: '🦊 MetaMask / Rabby (EVM)',
+    wallet_disconnect: 'Disconnect',
+    wallet_alert_install: 'The {name} extension is not installed.\nInstall the browser extension and reload the page.',
+    wallet_alert_error: 'Could not connect to wallet. Make sure the extension is unlocked.',
   },
   pt: {
     search_placeholder: 'Pesquisar pool, token, protocolo...',
@@ -2229,6 +2382,16 @@ const TRANSLATIONS = {
     btc_retry: '↺ Tentar novamente',
     btc_mining_label: 'Custo de Mineração vs Preço',
     btc_mining_source: 'MacroMicro',
+    wallet_btn: 'Ligar Wallet',
+    wallet_dd_title: 'Ligar Wallet (só leitura)',
+    wallet_phantom_sub: 'Solana · EVM',
+    wallet_evm_sub: 'EVM · Ethereum, Base...',
+    wallet_not_installed: 'Extensão não instalada',
+    wallet_connected_phantom: '👻 Phantom (Solana)',
+    wallet_connected_evm: '🦊 MetaMask / Rabby (EVM)',
+    wallet_disconnect: 'Desligar',
+    wallet_alert_install: 'A extensão {name} não está instalada.\nInstala a extensão no browser e recarrega a página.',
+    wallet_alert_error: 'Não foi possível ligar à wallet. Verifica se a extensão está desbloqueada.',
   },
   es: {
     search_placeholder: 'Buscar pool, token, protocolo...',
@@ -2284,6 +2447,16 @@ const TRANSLATIONS = {
     btc_retry: '↺ Intentar de nuevo',
     btc_mining_label: 'Costo Minería vs Precio',
     btc_mining_source: 'MacroMicro',
+    wallet_btn: 'Conectar Wallet',
+    wallet_dd_title: 'Conectar Wallet (solo lectura)',
+    wallet_phantom_sub: 'Solana · EVM',
+    wallet_evm_sub: 'EVM · Ethereum, Base...',
+    wallet_not_installed: 'Extensión no instalada',
+    wallet_connected_phantom: '👻 Phantom (Solana)',
+    wallet_connected_evm: '🦊 MetaMask / Rabby (EVM)',
+    wallet_disconnect: 'Desconectar',
+    wallet_alert_install: 'La extensión {name} no está instalada.\nInstala la extensión en el navegador y recarga la página.',
+    wallet_alert_error: 'No se pudo conectar a la wallet. Comprueba que la extensión esté desbloqueada.',
   },
 };
 
@@ -2413,11 +2586,30 @@ function applyTranslations() {
   if (btcErrorMsg) btcErrorMsg.textContent = t('btc_error_msg');
   const btcRetryBtn = document.getElementById('btc-retry-btn');
   if (btcRetryBtn) btcRetryBtn.textContent = t('btc_retry');
-  // lang buttons highlight
-  document.querySelectorAll('.lang-btn').forEach(b => {
-    b.style.borderColor = b.dataset.lang === currentLang ? 'rgba(0,229,160,0.5)' : 'rgba(255,255,255,0.07)';
-    b.style.color = b.dataset.lang === currentLang ? '#00e5a0' : '#8b9cc8';
+  // lang picker — update label and highlight active option
+  const langPickerLabel = document.getElementById('lang-picker-label');
+  if (langPickerLabel) langPickerLabel.textContent = currentLang.toUpperCase();
+  document.querySelectorAll('.lang-picker-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === currentLang);
   });
+  // wallet button
+  const walletBtnLabel = document.getElementById('wallet-btn-label');
+  const walletDdTitle = document.getElementById('wallet-dd-title');
+  const walletBtn = document.getElementById('wallet-btn');
+  if (walletBtnLabel && !walletBtn.classList.contains('connected')) walletBtnLabel.textContent = t('wallet_btn');
+  if (walletDdTitle) walletDdTitle.textContent = t('wallet_dd_title');
+  const optPhantomSub = document.getElementById('opt-phantom-sub');
+  const optEvmSub = document.getElementById('opt-evm-sub');
+  const optPhantom = document.getElementById('opt-phantom');
+  const optEvm = document.getElementById('opt-evm');
+  if (optPhantomSub) optPhantomSub.textContent = optPhantom && optPhantom.classList.contains('unavailable') ? t('wallet_not_installed') : t('wallet_phantom_sub');
+  if (optEvmSub) optEvmSub.textContent = optEvm && optEvm.classList.contains('unavailable') ? t('wallet_not_installed') : t('wallet_evm_sub');
+  const walletDisconnectLabel = document.getElementById('wallet-disconnect-label');
+  if (walletDisconnectLabel) walletDisconnectLabel.textContent = t('wallet_disconnect');
+  const walletConnectedType = document.getElementById('wallet-connected-type');
+  if (walletConnectedType && walletConnectedType.dataset.wtype) {
+    walletConnectedType.textContent = t(walletConnectedType.dataset.wtype === 'phantom' ? 'wallet_connected_phantom' : 'wallet_connected_evm');
+  }
 }
 // ── end i18n ──────────────────────────────────────────────
 
@@ -2951,6 +3143,140 @@ fetchPools();
 setTimeout(applyTranslations, 500);
 setTimeout(btcWidgetInit, 1500);
 setInterval(fetchPools, 60000);
+
+// ── Language Picker ───────────────────────────────────────
+function langPickerToggle() {
+  document.getElementById('lang-picker-dropdown').classList.toggle('open');
+}
+function langPickerClose() {
+  document.getElementById('lang-picker-dropdown').classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('lang-picker-wrap');
+  if (wrap && !wrap.contains(e.target)) langPickerClose();
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  WALLET CONNECT  (read-only: apenas endereço, sem assinatura)
+// ═══════════════════════════════════════════════════════════════
+(function() {
+  let walletState = { connected: false, address: '', type: '' };
+
+  // Detect available wallets — runs after applyTranslations (500ms) so t() has correct lang
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+    const hasPhantom = !!(window.solana && window.solana.isPhantom) || !!(window.phantom?.solana);
+    const hasEvm = !!window.ethereum;
+
+    const optPhantom = document.getElementById('opt-phantom');
+    const optEvm = document.getElementById('opt-evm');
+
+    if (!hasPhantom) {
+      optPhantom.classList.add('unavailable');
+      document.getElementById('opt-phantom-sub').textContent = t('wallet_not_installed');
+    }
+    if (!hasEvm) {
+      optEvm.classList.add('unavailable');
+      document.getElementById('opt-evm-sub').textContent = t('wallet_not_installed');
+    }
+
+    // Restore saved session (read-only, sem risco)
+    try {
+      const saved = sessionStorage.getItem('poolfi_wallet');
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.address) _walletSetConnected(data.address, data.type);
+      }
+    } catch(e) {}
+    }, 600); // after applyTranslations (500ms)
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('wallet-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('wallet-dropdown').classList.remove('open');
+    }
+  });
+
+  window.walletToggleDropdown = function() {
+    document.getElementById('wallet-dropdown').classList.toggle('open');
+  };
+
+  window.walletConnect = async function(type) {
+    const opt = document.getElementById(type === 'phantom' ? 'opt-phantom' : 'opt-evm');
+    if (opt.classList.contains('unavailable')) {
+      const name = type === 'phantom' ? 'Phantom' : 'MetaMask/Rabby';
+      alert(t('wallet_alert_install').replace('{name}', name));
+      return;
+    }
+
+    try {
+      let address = '';
+      if (type === 'phantom') {
+        // Phantom Solana — read-only connect (onlyIfTrusted:false para primeira ligação)
+        const provider = window.phantom?.solana ?? window.solana;
+        const resp = await provider.connect({ onlyIfTrusted: false });
+        address = resp.publicKey.toString();
+      } else {
+        // MetaMask / Rabby / qualquer EVM — eth_requestAccounts
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        address = accounts[0] || '';
+      }
+
+      if (address) {
+        _walletSetConnected(address, type);
+        try { sessionStorage.setItem('poolfi_wallet', JSON.stringify({ address, type })); } catch(e) {}
+      }
+    } catch(err) {
+      console.warn('Wallet connect error:', err);
+      if (err.code === 4001) {
+        // User rejected
+      } else {
+        alert(t('wallet_alert_error'));
+      }
+    }
+  };
+
+  window.walletDisconnect = function() {
+    walletState = { connected: false, address: '', type: '' };
+    try { sessionStorage.removeItem('poolfi_wallet'); } catch(e) {}
+
+    const btn = document.getElementById('wallet-btn');
+    const label = document.getElementById('wallet-btn-label');
+    btn.classList.remove('connected');
+    label.textContent = 'Wallet';
+
+    document.getElementById('wallet-connected-block').style.display = 'none';
+    document.getElementById('wallet-options-block').style.display = '';
+    document.getElementById('wallet-dropdown').classList.remove('open');
+  };
+
+  function _walletSetConnected(address, type) {
+    walletState = { connected: true, address, type };
+
+    const btn = document.getElementById('wallet-btn');
+    const label = document.getElementById('wallet-btn-label');
+    btn.classList.add('connected');
+
+    // Truncate address
+    const short = address.length > 12
+      ? address.slice(0, 6) + '…' + address.slice(-4)
+      : address;
+    label.textContent = short;
+
+    const typeLabel = t(type === 'phantom' ? 'wallet_connected_phantom' : 'wallet_connected_evm');
+    document.getElementById('wallet-connected-type').textContent = typeLabel;
+    document.getElementById('wallet-connected-type').dataset.wtype = type;
+    document.getElementById('wallet-connected-addr').textContent = address.length > 20
+      ? address.slice(0, 12) + '…' + address.slice(-6)
+      : address;
+
+    document.getElementById('wallet-connected-block').style.display = '';
+    document.getElementById('wallet-options-block').style.display = 'none';
+    document.getElementById('wallet-dropdown').classList.remove('open');
+  }
+})();
 </script>
 </body>
 </html>
