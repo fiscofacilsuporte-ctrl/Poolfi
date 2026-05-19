@@ -1135,7 +1135,9 @@
           <span id="wallet-btn-label">Wallet</span>
         </button>
         <div class="wallet-dropdown" id="wallet-dropdown">
-          <div class="wallet-dropdown-title" id="wallet-dd-title">Connect Wallet (read-only)</div>
+        <div class="wallet-dropdown-title" id="wallet-dd-title" data-orig="Connect Wallet (read-only)">Connect Wallet (read-only)</div>
+          <!-- Hint visível durante a ligação -->
+          <div id="wallet-connect-hint" style="display:none;font-size:10px;color:var(--amber);padding:4px 10px 6px;line-height:1.4;"></div>
           <!-- Connected state (hidden by default) -->
           <div id="wallet-connected-block" style="display:none">
             <div class="wallet-connected-info" id="wallet-connected-type">—</div>
@@ -3219,33 +3221,55 @@ document.addEventListener('click', function(e) {
 (function() {
   let walletState = { connected: false, address: '', type: '' };
 
-  // Detect available wallets — runs after applyTranslations (500ms) so t() has correct lang
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-    const hasPhantom = !!(window.solana && window.solana.isPhantom) || !!(window.phantom?.solana);
+  // Detect available wallets — extensões do Chrome podem injetar após load
+  // Tentamos 3 vezes: 600ms, 1500ms e 3000ms para garantir deteção fiável
+  function _detectAndUpdateWalletUI() {
+    const hasPhantom = !!(window.phantom?.solana) || !!(window.solana?.isPhantom);
     const hasEvm = !!window.ethereum;
 
     const optPhantom = document.getElementById('opt-phantom');
     const optEvm = document.getElementById('opt-evm');
+    if (!optPhantom || !optEvm) return;
 
-    if (!hasPhantom) {
+    // Phantom
+    if (hasPhantom) {
+      optPhantom.classList.remove('unavailable');
+      const sub = document.getElementById('opt-phantom-sub');
+      if (sub && !sub.dataset.custom) sub.textContent = 'Solana · EVM';
+    } else {
       optPhantom.classList.add('unavailable');
       document.getElementById('opt-phantom-sub').textContent = t('wallet_not_installed');
     }
-    if (!hasEvm) {
+
+    // EVM (MetaMask / Rabby)
+    if (hasEvm) {
+      optEvm.classList.remove('unavailable');
+      const sub = document.getElementById('opt-evm-sub');
+      if (sub && !sub.dataset.custom) sub.textContent = 'EVM · Ethereum, Base...';
+    } else {
       optEvm.classList.add('unavailable');
       document.getElementById('opt-evm-sub').textContent = t('wallet_not_installed');
     }
+  }
+
+  window.addEventListener('load', function() {
+    // Primeira tentativa: 600ms (após applyTranslations)
+    setTimeout(_detectAndUpdateWalletUI, 600);
+    // Segunda tentativa: 1500ms (Chrome pode ser mais lento)
+    setTimeout(_detectAndUpdateWalletUI, 1500);
+    // Terceira tentativa: 3000ms (garantia para PCs lentos)
+    setTimeout(_detectAndUpdateWalletUI, 3000);
 
     // Restore saved session (read-only, sem risco)
-    try {
-      const saved = sessionStorage.getItem('poolfi_wallet');
-      if (saved) {
-        const data = JSON.parse(saved);
-        if (data.address) _walletSetConnected(data.address, data.type);
-      }
-    } catch(e) {}
-    }, 600); // after applyTranslations (500ms)
+    setTimeout(function() {
+      try {
+        const saved = sessionStorage.getItem('poolfi_wallet');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.address) _walletSetConnected(data.address, data.type);
+        }
+      } catch(e) {}
+    }, 600);
   });
 
   // Close dropdown on outside click
@@ -3260,44 +3284,92 @@ document.addEventListener('click', function(e) {
     document.getElementById('wallet-dropdown').classList.toggle('open');
   };
 
+  // Mostra estado de loading no dropdown enquanto aguarda resposta da extensão
+  function _walletShowConnecting(type) {
+    const label = type === 'phantom' ? 'Phantom' : 'MetaMask / Rabby';
+    const ddTitle = document.getElementById('wallet-dd-title');
+    if (ddTitle) {
+      ddTitle.innerHTML = `<span style="color:var(--amber)">⏳ A ligar ${label}…</span>`;
+    }
+    // Hint: diz ao utilizador para olhar para o popup da extensão
+    const hint = document.getElementById('wallet-connect-hint');
+    if (hint) {
+      hint.textContent = '👆 Abre o popup da extensão no canto superior direito do Chrome';
+      hint.style.display = 'block';
+    }
+  }
+
+  function _walletResetConnectingUI() {
+    const ddTitle = document.getElementById('wallet-dd-title');
+    if (ddTitle) ddTitle.innerHTML = ddTitle.dataset.orig || 'Connect Wallet (read-only)';
+    const hint = document.getElementById('wallet-connect-hint');
+    if (hint) hint.style.display = 'none';
+  }
+
   window.walletConnect = async function(type) {
-    const opt = document.getElementById(type === 'phantom' ? 'opt-phantom' : 'opt-evm');
-    if (opt.classList.contains('unavailable')) {
-      const name = type === 'phantom' ? 'Phantom' : 'MetaMask/Rabby';
-      alert(t('wallet_alert_install').replace('{name}', name));
+    // Re-deteção ao vivo — não confia apenas na classe 'unavailable' definida no load
+    const hasPhantom = !!(window.phantom?.solana) || !!(window.solana?.isPhantom);
+    const hasEvm = !!window.ethereum;
+    const isPhantom = type === 'phantom';
+
+    if (isPhantom && !hasPhantom) {
+      alert('A extensão Phantom não está instalada.\nInstala em phantom.app e recarrega a página.');
+      window.open('https://phantom.app/', '_blank');
+      return;
+    }
+    if (!isPhantom && !hasEvm) {
+      alert('A extensão MetaMask/Rabby não está instalada.\nInstala a extensão e recarrega a página.');
+      window.open('https://metamask.io/', '_blank');
       return;
     }
 
+    // Bloqueia duplo-clique
+    const opt = document.getElementById(isPhantom ? 'opt-phantom' : 'opt-evm');
+    if (opt && opt.dataset.connecting === '1') return;
+    if (opt) opt.dataset.connecting = '1';
+
+    _walletShowConnecting(type);
+
     try {
       let address = '';
-      if (type === 'phantom') {
-        // Phantom Solana — read-only connect (onlyIfTrusted:false para primeira ligação)
-        const provider = window.phantom?.solana ?? window.solana;
+      if (isPhantom) {
+        // Phantom Solana: preferir window.phantom.solana (mais fiável no Chrome)
+        const provider = window.phantom?.solana ?? (window.solana?.isPhantom ? window.solana : null);
+        if (!provider) throw new Error('Phantom provider não encontrado após re-deteção.');
         const resp = await provider.connect({ onlyIfTrusted: false });
         address = resp.publicKey.toString();
       } else {
-        // MetaMask / Rabby / qualquer EVM — eth_requestAccounts
+        // MetaMask / Rabby — eth_requestAccounts
+        // Rabby e MetaMask partilham window.ethereum; o que estiver ativo responde
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         address = accounts[0] || '';
       }
 
       if (address) {
+        _walletResetConnectingUI();
         _walletSetConnected(address, type);
         try { sessionStorage.setItem('poolfi_wallet', JSON.stringify({ address, type })); } catch(e) {}
       }
     } catch(err) {
       console.warn('Wallet connect error:', err);
-      if (err.code === 4001) {
-        // User rejected
+      _walletResetConnectingUI();
+      if (err.code === 4001 || err.code === 'ACTION_REJECTED') {
+        // Utilizador rejeitou — sem alerta, apenas reseta UI
+      } else if (err.code === -32002) {
+        // Pedido já pendente na extensão (MetaMask/Rabby)
+        alert('Já existe um pedido pendente na extensão.\n👆 Clica no ícone da extensão no canto superior direito do Chrome para o ver.');
       } else {
-        alert(t('wallet_alert_error'));
+        alert(t('wallet_alert_error') + '\n\n👆 Se o popup da extensão não apareceu, clica no ícone dela no canto superior direito do Chrome.');
       }
+    } finally {
+      if (opt) delete opt.dataset.connecting;
     }
   };
 
   window.walletDisconnect = function() {
     walletState = { connected: false, address: '', type: '' };
     try { sessionStorage.removeItem('poolfi_wallet'); } catch(e) {}
+    _walletResetConnectingUI();
 
     const btn = document.getElementById('wallet-btn');
     const label = document.getElementById('wallet-btn-label');
