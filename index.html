@@ -3427,20 +3427,38 @@ document.addEventListener('click', function(e) {
     try {
       let balance = null;
       let symbol = '';
-      let decimals = 9;
 
       if (type === 'phantom') {
-        // Solana: getBalance via public RPC
-        const res = await fetch('https://api.mainnet-beta.solana.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [address] })
-        });
-        const data = await res.json();
-        if (data.result && data.result.value !== undefined) {
-          balance = data.result.value / 1e9; // lamports → SOL
-          symbol = 'SOL';
+        // Solana: tenta vários RPCs públicos em sequência
+        const SOL_RPCS = [
+          'https://api.mainnet-beta.solana.com',
+          'https://solana-mainnet.rpc.extrnode.com',
+          'https://rpc.ankr.com/solana',
+          'https://solana.publicnode.com',
+        ];
+        const body = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [address] });
+        let lastErr;
+        for (const rpc of SOL_RPCS) {
+          try {
+            const res = await fetch(rpc, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body,
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            if (data.result && data.result.value !== undefined) {
+              balance = data.result.value / 1e9; // lamports → SOL
+              symbol = 'SOL';
+              break; // sucesso, não precisa tentar mais
+            }
+            throw new Error('RPC sem resultado');
+          } catch(err) {
+            lastErr = err;
+          }
         }
+        if (balance === null) throw lastErr || new Error('Todos os RPCs falharam');
+
       } else {
         // EVM: eth_getBalance via injected provider
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -3456,10 +3474,17 @@ document.addEventListener('click', function(e) {
         document.getElementById('wallet-balance-symbol').textContent = symbol;
       }
     } catch(e) {
+      console.warn('_fetchBalance error:', e);
       document.getElementById('wallet-balance-value').textContent = t('wallet_balance_error');
     }
   }
 })();
 </script>
+<!-- BEGIN AADS AD UNIT 2438227 -->
+<div id="frame" style="width: 100%;margin: auto;position: relative; z-index: 99998;">
+  <iframe data-aa='2438227' src='//acceptable.a-ads.com/2438227/?size=Adaptive'
+    style='border:0; padding:0; width:70%; height:auto; overflow:hidden;display: block;margin: auto'></iframe>
+</div>
+<!-- END AADS AD UNIT 2438227 -->
 </body>
 </html>
