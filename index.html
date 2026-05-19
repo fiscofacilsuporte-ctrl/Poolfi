@@ -489,6 +489,33 @@
     font-family: var(--mono); font-size: 11px; color: var(--text2);
     padding: 0 10px 6px;
   }
+  /* Balance panel */
+  .wallet-balance-panel {
+    margin: 4px 8px 6px; padding: 10px 12px;
+    background: var(--bg3); border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .wallet-balance-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+  }
+  .wallet-balance-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+  .wallet-balance-value {
+    font-size: 15px; font-weight: 700; color: var(--text);
+    font-family: var(--mono); letter-spacing: -0.02em;
+  }
+  .wallet-balance-symbol { font-size: 11px; color: var(--text3); font-weight: 500; }
+  .wallet-balance-loading { font-size: 11px; color: var(--text3); font-style: italic; }
+  .wallet-explorer-btn {
+    display: flex; align-items: center; gap: 5px;
+    margin: 0 8px 4px; padding: 7px 10px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); cursor: pointer;
+    font-size: 11px; color: var(--text3); font-family: var(--font);
+    text-decoration: none; transition: all 0.15s; width: calc(100% - 16px);
+    justify-content: center;
+  }
+  .wallet-explorer-btn:hover { border-color: var(--purple); color: var(--text); }
 
   /* Donation button */
   .donate-btn {
@@ -1113,6 +1140,23 @@
           <div id="wallet-connected-block" style="display:none">
             <div class="wallet-connected-info" id="wallet-connected-type">—</div>
             <div class="wallet-connected-addr" id="wallet-connected-addr">—</div>
+            <!-- Balance panel -->
+            <div class="wallet-balance-panel">
+              <div class="wallet-balance-row">
+                <div>
+                  <div class="wallet-balance-label" id="wallet-balance-label">Saldo</div>
+                  <div style="display:flex;align-items:baseline;gap:5px;margin-top:2px">
+                    <span class="wallet-balance-value" id="wallet-balance-value"><span class="wallet-balance-loading">…</span></span>
+                    <span class="wallet-balance-symbol" id="wallet-balance-symbol"></span>
+                  </div>
+                </div>
+                <div style="font-size:22px" id="wallet-balance-icon">💰</div>
+              </div>
+            </div>
+            <a class="wallet-explorer-btn" id="wallet-explorer-btn" href="#" target="_blank" rel="noopener">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <span id="wallet-explorer-label">Ver no Explorer</span>
+            </a>
             <div class="wallet-divider"></div>
             <div class="wallet-disconnect-row" onclick="walletDisconnect()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -2327,6 +2371,9 @@ const TRANSLATIONS = {
     wallet_disconnect: 'Disconnect',
     wallet_alert_install: 'The {name} extension is not installed.\nInstall the browser extension and reload the page.',
     wallet_alert_error: 'Could not connect to wallet. Make sure the extension is unlocked.',
+    wallet_balance_label: 'Native Balance',
+    wallet_balance_error: 'Could not fetch',
+    wallet_explorer: 'View on Explorer',
   },
   pt: {
     search_placeholder: 'Pesquisar pool, token, protocolo...',
@@ -2392,6 +2439,9 @@ const TRANSLATIONS = {
     wallet_disconnect: 'Desligar',
     wallet_alert_install: 'A extensão {name} não está instalada.\nInstala a extensão no browser e recarrega a página.',
     wallet_alert_error: 'Não foi possível ligar à wallet. Verifica se a extensão está desbloqueada.',
+    wallet_balance_label: 'Saldo Nativo',
+    wallet_balance_error: 'Erro ao carregar',
+    wallet_explorer: 'Ver no Explorer',
   },
   es: {
     search_placeholder: 'Buscar pool, token, protocolo...',
@@ -2457,6 +2507,9 @@ const TRANSLATIONS = {
     wallet_disconnect: 'Desconectar',
     wallet_alert_install: 'La extensión {name} no está instalada.\nInstala la extensión en el navegador y recarga la página.',
     wallet_alert_error: 'No se pudo conectar a la wallet. Comprueba que la extensión esté desbloqueada.',
+    wallet_balance_label: 'Saldo Nativo',
+    wallet_balance_error: 'Error al cargar',
+    wallet_explorer: 'Ver en Explorer',
   },
 };
 
@@ -2610,6 +2663,10 @@ function applyTranslations() {
   if (walletConnectedType && walletConnectedType.dataset.wtype) {
     walletConnectedType.textContent = t(walletConnectedType.dataset.wtype === 'phantom' ? 'wallet_connected_phantom' : 'wallet_connected_evm');
   }
+  const walletBalanceLabel = document.getElementById('wallet-balance-label');
+  if (walletBalanceLabel) walletBalanceLabel.textContent = t('wallet_balance_label');
+  const walletExplorerLabel = document.getElementById('wallet-explorer-label');
+  if (walletExplorerLabel) walletExplorerLabel.textContent = t('wallet_explorer');
 }
 // ── end i18n ──────────────────────────────────────────────
 
@@ -3259,22 +3316,76 @@ document.addEventListener('click', function(e) {
     const label = document.getElementById('wallet-btn-label');
     btn.classList.add('connected');
 
-    // Truncate address
-    const short = address.length > 12
-      ? address.slice(0, 6) + '…' + address.slice(-4)
-      : address;
+    const short = address.length > 12 ? address.slice(0, 6) + '…' + address.slice(-4) : address;
     label.textContent = short;
 
     const typeLabel = t(type === 'phantom' ? 'wallet_connected_phantom' : 'wallet_connected_evm');
     document.getElementById('wallet-connected-type').textContent = typeLabel;
     document.getElementById('wallet-connected-type').dataset.wtype = type;
     document.getElementById('wallet-connected-addr').textContent = address.length > 20
-      ? address.slice(0, 12) + '…' + address.slice(-6)
-      : address;
+      ? address.slice(0, 12) + '…' + address.slice(-6) : address;
+
+    // Labels
+    document.getElementById('wallet-balance-label').textContent = t('wallet_balance_label');
+    document.getElementById('wallet-explorer-label').textContent = t('wallet_explorer');
+
+    // Reset balance UI
+    document.getElementById('wallet-balance-value').innerHTML = '<span class="wallet-balance-loading">…</span>';
+    document.getElementById('wallet-balance-symbol').textContent = '';
+
+    // Explorer link
+    const explorerBtn = document.getElementById('wallet-explorer-btn');
+    if (type === 'phantom') {
+      explorerBtn.href = `https://solscan.io/account/${address}`;
+      document.getElementById('wallet-balance-icon').textContent = '◎';
+    } else {
+      explorerBtn.href = `https://etherscan.io/address/${address}`;
+      document.getElementById('wallet-balance-icon').textContent = '⟠';
+    }
 
     document.getElementById('wallet-connected-block').style.display = '';
     document.getElementById('wallet-options-block').style.display = 'none';
     document.getElementById('wallet-dropdown').classList.remove('open');
+
+    // Fetch native balance async
+    _fetchBalance(address, type);
+  }
+
+  async function _fetchBalance(address, type) {
+    try {
+      let balance = null;
+      let symbol = '';
+      let decimals = 9;
+
+      if (type === 'phantom') {
+        // Solana: getBalance via public RPC
+        const res = await fetch('https://api.mainnet-beta.solana.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [address] })
+        });
+        const data = await res.json();
+        if (data.result && data.result.value !== undefined) {
+          balance = data.result.value / 1e9; // lamports → SOL
+          symbol = 'SOL';
+        }
+      } else {
+        // EVM: eth_getBalance via injected provider
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        const balHex = await window.ethereum.request({ method: 'eth_getBalance', params: [address, 'latest'] });
+        balance = parseInt(balHex, 16) / 1e18;
+        const chainSymbols = { '0x1':'ETH','0x38':'BNB','0x89':'MATIC','0xa4b1':'ETH','0x2105':'ETH','0xa':'ETH','0xe708':'ETH' };
+        symbol = chainSymbols[chainId] || 'ETH';
+      }
+
+      if (balance !== null) {
+        const fmt = balance < 0.001 ? balance.toFixed(6) : balance < 1 ? balance.toFixed(4) : balance.toFixed(3);
+        document.getElementById('wallet-balance-value').textContent = fmt;
+        document.getElementById('wallet-balance-symbol').textContent = symbol;
+      }
+    } catch(e) {
+      document.getElementById('wallet-balance-value').textContent = t('wallet_balance_error');
+    }
   }
 })();
 </script>
