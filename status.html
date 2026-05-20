@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PoolFi — System Status</title>
+<link rel="canonical" href="https://poolfi.xyz/status"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --border: #1e2a3a;
+    --accent: #00e5ff;
+    --green: #00ff9d;
+    --yellow: #ffd700;
+    --red: #ff4560;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  /* Grid noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+  }
+
+  .logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #fff;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .last-checked {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* Overall banner */
+  .banner {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem 1.8rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+    transition: border-color 0.4s;
+  }
+
+  .banner.ok { border-color: var(--green); }
+  .banner.degraded { border-color: var(--yellow); }
+  .banner.down { border-color: var(--red); }
+
+  .banner-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--green);
+    box-shadow: 0 0 12px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .banner-dot.degraded { background: var(--yellow); box-shadow: 0 0 12px var(--yellow); }
+  .banner-dot.down { background: var(--red); box-shadow: 0 0 12px var(--red); animation: none; }
+
+  .banner-title { font-size: 1.1rem; font-weight: 700; }
+  .banner-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+  /* Section */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+
+  /* Service rows */
+  .services {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    margin-bottom: 2.5rem;
+  }
+
+  .service-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+    transition: background 0.2s;
+  }
+
+  .service-row:last-child { border-bottom: none; }
+  .service-row:hover { background: rgba(255,255,255,0.02); }
+
+  .svc-left { display: flex; align-items: center; gap: 0.8rem; }
+
+  .svc-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+  }
+
+  .svc-name { font-weight: 700; font-size: 0.9rem; }
+  .svc-url { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--muted); margin-top: 1px; }
+
+  .svc-right { display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; }
+
+  .latency {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .badge.ok { background: rgba(0,255,157,0.12); color: var(--green); }
+  .badge.checking { background: rgba(100,116,139,0.15); color: var(--muted); }
+  .badge.degraded { background: rgba(255,215,0,0.12); color: var(--yellow); }
+  .badge.down { background: rgba(255,69,96,0.12); color: var(--red); }
+
+  /* History bars */
+  .uptime-bars {
+    display: flex;
+    gap: 2px;
+    margin-top: 0.4rem;
+  }
+
+  .bar {
+    width: 6px;
+    height: 22px;
+    border-radius: 2px;
+    background: rgba(0,255,157,0.7);
+    transition: opacity 0.2s;
+  }
+
+  .bar:hover { opacity: 0.8; cursor: default; }
+  .bar.miss { background: rgba(255,69,96,0.6); }
+  .bar.empty { background: var(--border); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    margin-top: 3rem;
+    line-height: 1.8;
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 1.2rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .spinner {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">Pool<span>Fi</span></div>
+    <div class="last-checked">
+      <div>Last checked</div>
+      <div id="last-time">—</div>
+    </div>
+  </header>
+
+  <!-- Overall status banner -->
+  <div class="banner ok" id="banner">
+    <div class="banner-dot" id="banner-dot"></div>
+    <div>
+      <div class="banner-title" id="banner-title"><span class="spinner"></span> Checking systems…</div>
+      <div class="banner-sub" id="banner-sub">Running diagnostics on all services</div>
+    </div>
+  </div>
+
+  <!-- Core services -->
+  <div class="section-label">Core</div>
+  <div class="services" id="services-core"></div>
+
+  <!-- Data APIs -->
+  <div class="section-label" style="margin-top:2rem">Data APIs</div>
+  <div class="services" id="services-api"></div>
+
+  <div style="text-align:center">
+    <button class="refresh-btn" onclick="runChecks()">↻ Refresh</button>
+  </div>
+
+  <footer>
+    <div>PoolFi Status Page — <a href="https://poolfi.xyz">poolfi.xyz</a></div>
+    <div>Auto-refreshes every 60 seconds</div>
+  </footer>
+</div>
+
+<script>
+const SERVICES = {
+  core: [
+    {
+      id: 'poolfi',
+      name: 'PoolFi Website',
+      icon: '🌊',
+      url: 'https://poolfi.xyz',
+      check: 'https://poolfi.xyz',
+    },
+  ],
+  api: [
+    {
+      id: 'defillama',
+      name: 'DeFiLlama Yields',
+      icon: '🦙',
+      url: 'yields.llama.fi',
+      check: 'https://yields.llama.fi/pools?limit=1',
+    },
+    {
+      id: 'coingecko',
+      name: 'CoinGecko',
+      icon: '🦎',
+      url: 'api.coingecko.com',
+      check: 'https://api.coingecko.com/api/v3/ping',
+    },
+    {
+      id: 'altme',
+      name: 'Alternative.me (Fear & Greed)',
+      icon: '😱',
+      url: 'api.alternative.me',
+      check: 'https://api.alternative.me/fng/?limit=1',
+    },
+  ]
+};
+
+// Simple in-memory uptime history (session only, 20 slots)
+const history = {};
+Object.values(SERVICES).flat().forEach(s => history[s.id] = Array(20).fill(null));
+
+function barsHTML(id) {
+  return history[id].map(v =>
+    v === null ? `<div class="bar empty" title="No data"></div>` :
+    v ? `<div class="bar" title="OK"></div>` :
+    `<div class="bar miss" title="Failed"></div>`
+  ).join('');
+}
+
+function renderRows(group, containerId) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = group.map(s => `
+    <div class="service-row" id="row-${s.id}">
+      <div class="svc-left">
+        <div class="svc-icon">${s.icon}</div>
+        <div>
+          <div class="svc-name">${s.name}</div>
+          <div class="svc-url">${s.url}</div>
+          <div class="uptime-bars" id="bars-${s.id}">${barsHTML(s.id)}</div>
+        </div>
+      </div>
+      <div class="svc-right">
+        <div class="latency" id="lat-${s.id}">—</div>
+        <div class="badge checking" id="badge-${s.id}">…</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function checkService(s) {
+  const badge = document.getElementById(`badge-${s.id}`);
+  const lat = document.getElementById(`lat-${s.id}`);
+  badge.className = 'badge checking';
+  badge.textContent = '…';
+  lat.textContent = '—';
+
+  const t0 = performance.now();
+  try {
+    const res = await fetch(s.check, { mode: 'cors', cache: 'no-store', signal: AbortSignal.timeout(8000) });
+    const ms = Math.round(performance.now() - t0);
+    const ok = res.ok;
+    history[s.id].shift();
+    history[s.id].push(ok);
+    document.getElementById(`bars-${s.id}`).innerHTML = barsHTML(s.id);
+
+    if (ok) {
+      badge.className = 'badge ok';
+      badge.textContent = 'OPERATIONAL';
+      lat.textContent = ms + ' ms';
+      return 'ok';
+    } else {
+      badge.className = 'badge degraded';
+      badge.textContent = 'DEGRADED';
+      lat.textContent = ms + ' ms';
+      return 'degraded';
+    }
+  } catch {
+    const ms = Math.round(performance.now() - t0);
+    history[s.id].shift();
+    history[s.id].push(false);
+    document.getElementById(`bars-${s.id}`).innerHTML = barsHTML(s.id);
+    badge.className = 'badge down';
+    badge.textContent = 'UNAVAILABLE';
+    lat.textContent = ms > 8000 ? 'timeout' : ms + ' ms';
+    return 'down';
+  }
+}
+
+async function runChecks() {
+  renderRows(SERVICES.core, 'services-core');
+  renderRows(SERVICES.api, 'services-api');
+
+  const banner = document.getElementById('banner');
+  const bannerTitle = document.getElementById('banner-title');
+  const bannerSub = document.getElementById('banner-sub');
+  const bannerDot = document.getElementById('banner-dot');
+  bannerTitle.innerHTML = '<span class="spinner"></span> Checking systems…';
+  bannerSub.textContent = 'Running diagnostics on all services';
+  banner.className = 'banner';
+
+  const all = [...SERVICES.core, ...SERVICES.api];
+  const results = await Promise.all(all.map(checkService));
+
+  document.getElementById('last-time').textContent = new Date().toLocaleTimeString();
+
+  const hasDown = results.includes('down');
+  const hasDegraded = results.includes('degraded');
+
+  if (hasDown) {
+    banner.className = 'banner down';
+    bannerDot.className = 'banner-dot down';
+    bannerTitle.textContent = 'Partial Outage Detected';
+    bannerSub.textContent = 'One or more services are currently unavailable.';
+  } else if (hasDegraded) {
+    banner.className = 'banner degraded';
+    bannerDot.className = 'banner-dot degraded';
+    bannerTitle.textContent = 'Degraded Performance';
+    bannerSub.textContent = 'Some services are responding slowly or with errors.';
+  } else {
+    banner.className = 'banner ok';
+    bannerDot.className = 'banner-dot';
+    bannerTitle.textContent = 'All Systems Operational';
+    bannerSub.textContent = 'PoolFi and all data providers are running normally.';
+  }
+}
+
+runChecks();
+setInterval(runChecks, 60000);
+</script>
+</body>
+</html>
